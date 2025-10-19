@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domino Plantillas</title>
+    <meta name="description" content="Aplicación para registro de consultas médicas en un solo archivo.">
+    
+    <!-- El SVG del logo está incrustado aquí para que no sea un archivo externo -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad1' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23007AFF;stop-opacity:1' /><stop offset='100%' style='stop-color:%230A84FF;stop-opacity:1' /></linearGradient></defs><rect width='100' height='100' rx='20' fill='url(%23grad1)'/><path d='M30 25 H70 V40 H55 V75 H45 V40 H30 V25 Z' fill='white' /><circle cx='50' cy='57.5' r='7.5' fill='%23007AFF' stroke='white' stroke-width='3'/></svg>">
+
+    <style>
+        /* --- ESTILOS CSS EMBEBIDOS --- */
+        /* -------------------- */
+        /* --- VARIABLES CSS -- */
+        /* -------------------- */
+        :root {
+          --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+          
+          /* Light Theme */
+          --color-primary: #007aff;
+          --color-primary-hover: #0056b3;
+          --color-success: #34c759;
+          --color-warning: #ff9500;
+          --color-danger: #ff3b30;
+          --color-background: #f0f2f5;
+          --color-surface: #ffffff;
+          --color-text-primary: #1d1d1f;
+          --color-text-secondary: #6e6e73;
+          --color-border: #d2d2d7;
+          --color-input-bg: #f9f9f9;
+          --color-shadow: rgba(0, 0, 0, 0.05);
+
+          --radius-sm: 4px;
+          --radius-md: 8px;
+          --radius-xl: 16px;
+          --shadow-sm: 0 1px 2px var(--color-shadow);
+          --shadow-md: 0 4px 12px var(--color-shadow);
+        }
+
+        [data-theme="dark"] {
+          --color-primary: #0a84ff;
+          --color-primary-hover: #409cff;
+          --color-success: #30d158;
+          --color-warning: #ff9f0a;
+          --color-danger: #ff453a;
+          --color-background: #000000;
+          --color-surface: #1c1c1e;
+          --color-text-primary: #ffffff;
+          --color-text-secondary: #8e8e93;
+          --color-border: #38383a;
+          --color-input-bg: #2c2c2e;
+          --color-shadow: rgba(0, 0, 0, 0.2);
+        }
+
+        /* -------------------- */
+        /* --- RESET & BASE --- */
+        /* -------------------- */
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
+        html {
+          font-size: 16px;
+        }
+
+        body {
+          font-family: var(--font-family-sans);
+          background-color: var(--color-background);
+          color: var(--color-text-primary);
+          line-height: 1.5;
+          transition: background-color 0.3s, color 0.3s;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* -------------------- */
+        /* --- LAYOUT -------- */
+        /* -------------------- */
+        .app-container {
+          display: grid;
+          grid-template-columns: 280px 1fr;
+          height: 100vh;
+          overflow: hidden;
+          transition: grid-template-columns 0.3s ease-in-out;
+        }
+
+        .app-container.sidebar-collapsed {
+            grid-template-columns: 0 1fr;
+        }
+
+        .sidebar {
+          background-color: var(--color-surface);
+          border-right: 1px solid var(--color-border);
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          transition: background-color 0.3s, border-color 0.3s;
+          overflow: hidden;
+        }
+
+        .sidebar-header {
+          padding: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid var(--color-border);
+          flex-shrink: 0;
+        }
+
+        .logo {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .logo-img {
+            width: 32px;
+            height: 32px;
+        }
+        .logo h1 {
+          font-size: 1.25rem;
+          font-weight: 600;
+        }
+
+        .patient-list-controls {
+            padding: 1rem;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        #fs-controls {
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 0.5rem;
+            background-color: var(--color-background);
+            border-radius: var(--radius-md);
+        }
+         #fs-controls p {
+            margin-bottom: 0.5rem;
+        }
+
+        .patient-list-container {
+          flex-grow: 1;
+          overflow-y: auto;
+          padding: 0.5rem 0;
+        }
+
+        #patient-list {
+          list-style: none;
+        }
+
+        #patient-list li {
+          padding: 0.75rem 1rem;
+          cursor: pointer;
+          border-left: 3px solid transparent;
+          transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        #patient-list li:hover {
+          background-color: var(--color-background);
+        }
+
+        #patient-list li.active {
+          background-color: var(--color-primary);
+          color: white;
+          border-left-color: var(--color-primary-hover);
+        }
+
+        #patient-list li .patient-name {
+            font-weight: 600;
+            display: block;
+        }
+
+        #patient-list li .patient-cedula {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+        #patient-list li.active .patient-cedula {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+
+        .main-content {
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+          overflow-y: auto;
+        }
+
+        .main-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 2rem;
+          background-color: var(--color-surface);
+          border-bottom: 1px solid var(--color-border);
+          position: sticky;
+          top: 0;
+          z-index: 10;
+        }
+        
+        .main-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .main-header h2 {
+          font-size: 1.5rem;
+        }
+
+        .patient-form-grid {
+          padding: 2rem;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+          max-width: 900px;
+          margin: 0 auto;
+          width: 100%;
+        }
+
+        .form-footer {
+            grid-column: 1 / -1;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* -------------------- */
+        /* --- COMPONENTES ---- */
+        /* -------------------- */
+        .card {
+          background-color: var(--color-surface);
+          border-radius: var(--radius-xl);
+          padding: 1.5rem;
+          border: 1px solid var(--color-border);
+          box-shadow: var(--shadow-sm);
+        }
+        .card-title {
+          font-size: 1.125rem;
+          font-weight: 600;
+          margin: -1.5rem -1.5rem 1rem -1.5rem;
+          padding: 1.5rem;
+          border-bottom: 1px solid var(--color-border);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .card-title-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* --- Formularios --- */
+        .form-grid, .findrisc-grid, .paho-risk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .form-grid-vitals {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            position: relative;
+        }
+
+        .form-group.with-unit {
+            position: relative;
+        }
+
+        .form-group.with-unit input {
+            padding-right: 45px;
+        }
+
+        .form-group.with-unit span {
+            position: absolute;
+            right: 10px;
+            top: 55%;
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="search"],
+        select,
+        textarea {
+          width: 100%;
+          padding: 0.75rem;
+          border-radius: var(--radius-md);
+          border: 1px solid var(--color-border);
+          background-color: var(--color-input-bg);
+          color: var(--color-text-primary);
+          font-size: 1rem;
+          font-family: inherit;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+          outline: none;
+          border-color: var(--color-primary);
+          box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+        }
+        input.invalid {
+            border-color: var(--color-danger);
+        }
+        input[readonly] {
+            background-color: var(--color-background);
+            cursor: not-allowed;
+        }
+
+        textarea {
+          resize: vertical;
+        }
+
+        .checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* --- Botones --- */
+        .button, .icon-button {
+          padding: 0.6rem 1rem;
+          border: none;
+          border-radius: var(--radius-md);
+          font-size: 0.9rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.2s, transform 0.1s;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        .button {
+            background-color: var(--color-surface);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+        }
+        .button:hover {
+            background-color: var(--color-background);
+        }
+        .button.primary {
+            background-color: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+        .button.primary:hover {
+            background-color: var(--color-primary-hover);
+        }
+        .button.success {
+            background-color: var(--color-success);
+            color: white;
+            border-color: var(--color-success);
+        }
+        .button.danger {
+            background-color: var(--color-danger);
+            color: white;
+            border-color: var(--color-danger);
+        }
+        .icon-button {
+            background: transparent;
+            padding: 0.5rem;
+            color: var(--color-text-secondary);
+        }
+        .icon-button:hover {
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+
+        /* --- Dropdown --- */
+        .dropdown {
+          position: relative;
+          display: inline-block;
+        }
+        .dropdown-content {
+          display: none;
+          position: absolute;
+          background-color: var(--color-surface);
+          min-width: 120px;
+          box-shadow: var(--shadow-md);
+          z-index: 1;
+          border-radius: var(--radius-md);
+          overflow: hidden;
+          border: 1px solid var(--color-border);
+          right: 0;
+        }
+        .dropdown-content a {
+          color: var(--color-text-primary);
+          padding: 12px 16px;
+          text-decoration: none;
+          display: block;
+        }
+        .dropdown-content a:hover {
+          background-color: var(--color-background);
+        }
+        .dropdown:hover .dropdown-content {
+          display: block;
+        }
+
+
+        /* --- Toasts --- */
+        #toast-container {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 1000;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .toast {
+          background-color: var(--color-surface);
+          color: var(--color-text-primary);
+          padding: 1rem;
+          border-radius: var(--radius-md);
+          box-shadow: var(--shadow-md);
+          opacity: 0;
+          transform: translateY(20px);
+          transition: opacity 0.3s, transform 0.3s;
+          border-left: 4px solid;
+        }
+        .toast.show {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .toast.success { border-color: var(--color-success); }
+        .toast.error { border-color: var(--color-danger); }
+        .toast.info { border-color: var(--color-primary); }
+
+
+        /* --- Utilidades --- */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-text-secondary);
+        }
+        .hidden {
+            display: none !important;
+        }
+        .text-sm { font-size: 0.875rem; }
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        code {
+            background-color: var(--color-background);
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 6px;
+        }
+
+        /* --- Tooltips --- */
+        .tooltip {
+          position: relative;
+        }
+        .tooltip .tooltip-text {
+          visibility: hidden;
+          width: 160px;
+          background-color: #333;
+          color: #fff;
+          text-align: center;
+          border-radius: var(--radius-sm);
+          padding: 5px;
+          position: absolute;
+          z-index: 1;
+          bottom: 125%;
+          left: 50%;
+          margin-left: -80px;
+          opacity: 0;
+          transition: opacity 0.3s;
+          font-size: 0.8rem;
+        }
+        .tooltip:hover .tooltip-text {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        /* --- IMC Category Chip --- */
+        #imc-category {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            color: white;
+        }
+        #imc-category.normal { background-color: var(--color-success); }
+        #imc-category.bajo { background-color: #f5a623; }
+        #imc-category.sobrepeso { background-color: #f5a623; }
+        #imc-category.obesidad { background-color: var(--color-danger); }
+
+        /* --- Escalas Dinámicas --- */
+        .escala-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 0.5rem;
+            align-items: flex-end;
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- Diagnóstico --- */
+        .dx-item {
+            display: grid;
+            grid-template-columns: 1fr 120px auto;
+            gap: 0.5rem;
+            align-items: flex-end;
+            margin-bottom: 0.5rem;
+        }
+        .autocomplete-results {
+            position: absolute;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-top: none;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 100;
+            top: 100%;
+        }
+        .autocomplete-results div {
+            padding: 0.75rem;
+            cursor: pointer;
+        }
+        .autocomplete-results div:hover, .autocomplete-results div.active {
+            background-color: var(--color-background);
+        }
+        .autocomplete-results div small {
+            color: var(--color-text-secondary);
+            margin-right: 0.5rem;
+        }
+
+        /* --- FINDRISC & PAHO Scale --- */
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            background-color: var(--color-background);
+            text-align: center;
+        }
+        .risk-badge {
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            color: white;
+            display: inline-block;
+        }
+        /* FINDRISC */
+        #findrisc-risk.bajo { background-color: var(--color-success); }
+        #findrisc-risk.elevado { background-color: #5856d6; } /* Indigo */
+        #findrisc-risk.moderado { background-color: var(--color-warning); }
+        #findrisc-risk.alto { background-color: #ff9500; } /* Orange */
+        #findrisc-risk.muy-alto { background-color: var(--color-danger); }
+
+        /* PAHO */
+        #paho-risk.bajo { background-color: var(--color-success); }
+        #paho-risk.medio { background-color: var(--color-warning); }
+        #paho-risk.alto { background-color: #ff9500; }
+        #paho-risk.muy-alto { background-color: var(--color-danger); }
+        #paho-risk.critico { background-color: #5856d6; }
+
+
+        /* --- Template Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay:not(.hidden) {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: var(--color-surface);
+            border-radius: var(--radius-xl);
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .modal-overlay:not(.hidden) .modal-content {
+             transform: scale(1);
+        }
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            overflow: hidden;
+        }
+        .template-sidebar {
+            border-right: 1px solid var(--color-border);
+            overflow-y: auto;
+        }
+        .template-main {
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        #template-categories, #template-list {
+            list-style: none;
+        }
+        #template-categories li, #template-list li {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--color-border);
+        }
+        #template-categories li:hover, #template-list li:hover {
+            background-color: var(--color-background);
+        }
+        #template-categories li.active {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        #template-list li {
+            border-radius: var(--radius-md);
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--color-border);
+        }
+
+
+        /* -------------------- */
+        /* --- RESPONSIVE ----- */
+        /* -------------------- */
+        @media (max-width: 1024px) {
+          .app-container {
+            grid-template-columns: 240px 1fr;
+          }
+        }
+        @media (max-width: 768px) {
+          .app-container {
+            grid-template-columns: 1fr;
+            height: auto;
+            overflow: visible;
+          }
+          .app-container.sidebar-collapsed {
+             grid-template-columns: 1fr; /* Override for mobile */
+          }
+          .sidebar {
+            height: auto;
+            border-right: none;
+            border-bottom: 1px solid var(--color-border);
+          }
+          .patient-list-container {
+              max-height: 200px;
+          }
+          .main-content {
+              height: auto;
+              overflow: visible;
+          }
+          .main-header {
+              flex-direction: row;
+              flex-wrap: wrap;
+              gap: 1rem;
+          }
+          .main-header-left {
+            width: 100%;
+          }
+          .action-buttons {
+            width: 100%;
+            justify-content: flex-start;
+          }
+          #sidebar-toggle {
+            display: none;
+          }
+          .modal-body {
+              grid-template-columns: 1fr;
+          }
+          .template-sidebar {
+              border-right: none;
+              border-bottom: 1px solid var(--color-border);
+              max-height: 200px;
+          }
+        }
+
+        /* -------------------- */
+        /* --- PRINT STYLES --- */
+        /* -------------------- */
+        @media print {
+          body {
+            background-color: #fff;
+            color: #000;
+          }
+          .app-container, .sidebar, .main-header, form button, input[type="file"] {
+            display: none;
+          }
+          .main-content {
+              display: block;
+              overflow: visible;
+              height: auto;
+          }
+          #print-layout {
+              display: block;
+              font-family: 'Times New Roman', Times, serif;
+          }
+          .print-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-bottom: 2rem;
+              border-bottom: 2px solid #000;
+              padding-bottom: 1rem;
+          }
+          .print-header .logo {
+              align-items: flex-start;
+          }
+          .print-header h1 {
+              font-size: 2rem;
+          }
+          .print-section {
+              margin-bottom: 1.5rem;
+              page-break-inside: avoid;
+          }
+          .print-section h3 {
+              font-size: 1.2rem;
+              border-bottom: 1px solid #ccc;
+              padding-bottom: 0.25rem;
+              margin-bottom: 0.5rem;
+          }
+          .print-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 0 1rem;
+          }
+          .print-item {
+              margin-bottom: 0.25rem;
+          }
+          .print-item strong {
+              display: inline-block;
+              min-width: 150px;
+          }
+          .print-full {
+              grid-column: 1 / -1;
+          }
+          .print-footer {
+              margin-top: 3rem;
+              text-align: center;
+              border-top: 1px solid #000;
+              padding-top: 2rem;
+          }
+          .print-footer .signature-line {
+              width: 250px;
+              border-bottom: 1px solid #000;
+              margin: 2rem auto 0;
+          }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Panel Lateral: Lista de Pacientes -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="logo">
+                    <!-- SVG del logo incrustado directamente -->
+                    <svg class="logo-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                        <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#007AFF;stop-opacity:1"></stop><stop offset="100%" style="stop-color:#0A84FF;stop-opacity:1"></stop></linearGradient></defs>
+                        <rect width="100" height="100" rx="20" fill="url(#grad1)"></rect>
+                        <path d="M30 25 H70 V40 H55 V75 H45 V40 H30 V25 Z" fill="white"></path>
+                        <circle cx="50" cy="57.5" r="7.5" fill="#007AFF" stroke="white" stroke-width="3"></circle>
+                    </svg>
+                    <h1>Domino Plantillas</h1>
+                </div>
+                <button id="theme-toggle" class="icon-button" aria-label="Cambiar tema">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                </button>
+            </header>
+            <div class="patient-list-controls">
+                <input type="search" id="search-patient" placeholder="Buscar por nombre o cédula...">
+                <button id="new-patient-btn" class="button primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Nuevo Paciente
+                </button>
+                <div id="fs-controls">
+                    <p>Guardado automático en carpeta:</p>
+                    <button id="select-folder-btn" class="button">Seleccionar Carpeta</button>
+                    <p id="folder-path" style="word-break: break-word; margin-top: 0.5rem;"></p>
+                </div>
+            </div>
+            <nav class="patient-list-container">
+                <ul id="patient-list"></ul>
+                <div id="empty-list-message" class="empty-state">
+                    <p>No hay registros de pacientes.</p>
+                    <p>Crea uno nuevo para empezar.</p>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Contenido Principal: Formulario de Consulta -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="main-header-left">
+                    <button id="sidebar-toggle" class="icon-button" title="Ocultar/mostrar panel lateral">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                    </button>
+                    <h2 id="form-title">Nuevo Registro</h2>
+                </div>
+                <div class="action-buttons">
+                    <button id="save-patient-btn" class="button success">Guardar</button>
+                    <button id="duplicate-patient-btn" class="button">Duplicar</button>
+                    <div class="dropdown">
+                        <button id="export-btn" class="button">Exportar</button>
+                        <div class="dropdown-content">
+                            <a href="#" id="export-json">JSON</a>
+                            <a href="#" id="export-js">JS</a>
+                        </div>
+                    </div>
+                    <button id="print-btn" class="button">Imprimir / PDF</button>
+                    <button id="delete-patient-btn" class="button danger">Eliminar</button>
+                </div>
+            </header>
+            
+            <form id="patient-form" class="patient-form-grid">
+                <input type="hidden" id="patient-id">
+                
+                <section class="card" id="datos-paciente">
+                    <div class="card-title">
+                        <span>1. Datos del Paciente</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-grid">
+                            <div class="form-group"><label for="nombre">Nombre Completo</label><input type="text" id="nombre" name="nombre" required></div>
+                            <div class="form-group"><label for="cedula">Cédula</label><input type="text" id="cedula" name="cedula" required pattern="\d{10}" title="Debe contener 10 dígitos"></div>
+                            <div class="form-group"><label for="edad">Edad</label><input type="number" id="edad" name="edad" min="0" max="120"></div>
+                            <div class="form-group"><label for="genero">Género</label><select id="genero" name="genero"><option value="">Seleccionar...</option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option><option value="Otro">Otro</option></select></div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="card">
+                    <div class="card-title">
+                        <span>2. Motivo de Consulta</span>
+                    </div>
+                    <div class="card-content"><div class="form-group"><textarea id="motivoConsulta" name="motivoConsulta" rows="3"></textarea></div></div>
+                </section>
+
+                <section class="card">
+                    <div class="card-title">
+                        <div class="card-title-content">
+                            <span>3. Enfermedad Actual</span>
+                            <button type="button" id="template-btn" class="icon-button" title="Usar plantilla">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content"><div class="form-group"><textarea id="enfermedadActual" name="enfermedadActual" rows="6"></textarea></div></div>
+                </section>
+
+                <section class="card">
+                    <div class="card-title">
+                        <span>4. Signos Vitales</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-grid-vitals">
+                            <div class="form-group with-unit"><label for="pas">PAS</label><input type="number" id="pas" name="pas" min="50" max="260"><span>mmHg</span></div>
+                            <div class="form-group with-unit"><label for="pad">PAD</label><input type="number" id="pad" name="pad" min="30" max="160"><span>mmHg</span></div>
+                            <div class="form-group with-unit tooltip"><label for="pam">PAM</label><input type="number" id="pam" name="pam"><span>mmHg</span><span class="tooltip-text">Se calcula automáticamente. Editable.</span></div>
+                            <div class="form-group with-unit"><label for="fc">FC</label><input type="number" id="fc" name="fc" min="30" max="220"><span>lat/min</span></div>
+                            <div class="form-group with-unit"><label for="fr">FR</label><input type="number" id="fr" name="fr" min="6" max="60"><span>resp/min</span></div>
+                            <div class="form-group with-unit"><label for="temperatura">Temp</label><input type="number" id="temperatura" name="temperatura" step="0.1" min="34" max="42"><span>°C</span></div>
+                            <div class="form-group with-unit"><label for="spo2">SpO₂</label><input type="number" id="spo2" name="spo2" min="50" max="100"><span>%</span></div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="card">
+                    <div class="card-title">
+                        <span>5. Datos Antropométricos</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-grid-vitals">
+                             <div class="form-group with-unit"><label for="peso">Peso</label><input type="number" id="peso" name="peso" step="0.1" required><span>kg</span></div>
+                            <div class="form-group with-unit"><label for="talla">Talla</label><input type="number" id="talla" name="talla_cm" required><span>cm</span></div>
+                            <div class="form-group with-unit tooltip"><label for="imc">IMC</label><input type="number" id="imc" name="imc" step="0.1" readonly><span id="imc-category"></span><span class="tooltip-text">Se calcula automáticamente.</span></div>
+                            <div class="form-group with-unit"><label for="perimetroAbdominal">P. Abdominal</label><input type="number" id="perimetroAbdominal" name="perimetroAbdominal"><span>cm</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-title">
+                        <span>6. Mediciones Capilares</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group checkbox-group"><input type="checkbox" id="noSeRealizaCapilar" name="noSeRealiza"><label for="noSeRealizaCapilar">No se realiza</label></div>
+                        <div class="form-grid-vitals" id="mediciones-capilares-fields">
+                             <div class="form-group with-unit"><label for="glucosa">Glucosa</label><input type="number" id="glucosa" name="glucosa" min="20" max="600"><span>mg/dL</span></div>
+                            <div class="form-group with-unit"><label for="hemoglobina">Hemoglobina</label><input type="number" id="hemoglobina" name="hemoglobina" step="0.1" min="3" max="22"><span>g/dL</span></div>
+                             <div class="form-group with-unit"><label for="hemoglobinaCorregida">Hb Corregida</label><input type="number" id="hemoglobinaCorregida" name="hemoglobinaCorregida" step="0.1"><span>g/dL</span></div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="card"><div class="card-title"><span>7. Revisión por Sistemas</span></div><div class="card-content"><div class="form-group"><textarea id="revisionSistemas" name="revisionSistemas" rows="6"></textarea></div></div></section>
+                <section class="card"><div class="card-title"><span>8. Examen Físico</span></div><div class="card-content"><div class="form-group"><textarea id="examenFisico" name="examenFisico" rows="6"></textarea></div></div></section>
+                
+                <section class="card">
+                    <div class="card-title">
+                        <span>9. Notas de Exámenes</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group"><label for="examenesNotas">Notas</label><textarea id="examenesNotas" name="examenesNotas" rows="4"></textarea></div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-title">
+                        <span>10. Diagnóstico (CIE-10)</span>
+                    </div>
+                    <div class="card-content">
+                         <div id="diagnosticos-container"></div>
+                         <button type="button" id="add-dx-btn" class="button mt-1">Agregar Diagnóstico</button>
+                         <hr style="margin: 1rem 0;">
+                         <div class="form-group"><label for="dxDiferenciales">Otros Diagnósticos Diferenciales</label><input type="text" id="dxDiferenciales" name="dxDiferenciales"></div>
+                    </div>
+                </section>
+
+                <section class="card"><div class="card-title"><span>11. Tratamiento</span></div><div class="card-content"><div class="form-group"><textarea id="tratamiento" name="tratamiento" rows="6"></textarea></div></div></section>
+                <section class="card"><div class="card-title"><span>12. Recomendaciones</span></div><div class="card-content"><div class="form-group"><textarea id="recomendaciones" name="recomendaciones" rows="4"></textarea></div></div></section>
+
+                <section class="card">
+                    <div class="card-title">
+                        <span>13. Escalas / Test Personalizados</span>
+                    </div>
+                    <div class="card-content">
+                        <div id="escalas-container"></div>
+                        <button type="button" id="add-escala-btn" class="button">Agregar Escala</button>
+                    </div>
+                </section>
+
+                 <section class="card">
+                    <div class="card-title">
+                        <span>14. Riesgo Cardiovascular (PAHO/OMS Ecuador)</span>
+                    </div>
+                    <div class="card-content" id="paho-risk-form">
+                        <p class="text-sm text-center mb-2">Calculadora de riesgo a 10 años para la región de las Américas B (incluye Ecuador), sin datos de laboratorio.</p>
+                        <div class="paho-risk-grid">
+                            <div class="form-group">
+                                <label>Género</label>
+                                <select name="paho_genero" class="paho-risk-input" disabled><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Edad</label>
+                                <input type="number" name="paho_edad" class="paho-risk-input" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>¿Es fumador?</label>
+                                <select name="paho_fumador" class="paho-risk-input">
+                                    <option value="0">No</option>
+                                    <option value="1">Sí</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Presión Arterial Sistólica</label>
+                                <input type="number" name="paho_pas" class="paho-risk-input" disabled>
+                            </div>
+                             <div class="form-group">
+                                <label>¿Tiene Diabetes Mellitus?</label>
+                                <select name="paho_diabetes" class="paho-risk-input">
+                                    <option value="0">No</option>
+                                    <option value="1">Sí</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="result-box">
+                            <strong>Riesgo Cardiovascular a 10 años:</strong>
+                            <div><span id="paho-risk-result" class="risk-badge bajo">&lt;10% (Bajo)</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-title">
+                        <span>15. FINDRISC - Test de Riesgo de Diabetes</span>
+                    </div>
+                    <div class="card-content" id="findrisc-form">
+                        <div class="findrisc-grid">
+                            <div class="form-group">
+                                <label>1. Edad</label>
+                                <select name="findrisc_edad" class="findrisc-input">
+                                    <option value="0">Menos de 45 años</option>
+                                    <option value="2">45-54 años</option>
+                                    <option value="3">55-64 años</option>
+                                    <option value="4">Más de 64 años</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2. Índice de masa corporal</label>
+                                <select name="findrisc_imc" class="findrisc-input">
+                                    <option value="0">&lt; 25</option>
+                                    <option value="1">25-30</option>
+                                    <option value="3">&gt; 30</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>3. Perímetro de cintura</label>
+                                <select name="findrisc_cintura" class="findrisc-input">
+                                    <option value="0">H: &lt;94cm / M: &lt;80cm</option>
+                                    <option value="3">H: 94-102cm / M: 80-88cm</option>
+                                    <option value="4">H: &gt;102cm / M: &gt;88cm</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>4. Actividad física (30 min/día)</label>
+                                <select name="findrisc_actividad" class="findrisc-input">
+                                    <option value="0">Sí</option>
+                                    <option value="2">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>5. Consumo de verduras/frutas</label>
+                                <select name="findrisc_vegetales" class="findrisc-input">
+                                    <option value="0">Cada día</option>
+                                    <option value="1">No todos los días</option>
+                                </select>
+                            </div>
+                             <div class="form-group">
+                                <label>6. ¿Toma medicación antihipertensiva?</label>
+                                <select name="findrisc_medicacion" class="findrisc-input">
+                                    <option value="0">No</option>
+                                    <option value="2">Sí</option>
+                                </select>
+                            </div>
+                             <div class="form-group">
+                                <label>7. ¿Glucosa alta alguna vez?</label>
+                                <select name="findrisc_glucosa" class="findrisc-input">
+                                    <option value="0">No</option>
+                                    <option value="5">Sí</option>
+                                </select>
+                            </div>
+                             <div class="form-group">
+                                <label>8. ¿Familiares con diabetes?</label>
+                                <select name="findrisc_familiares" class="findrisc-input">
+                                    <option value="0">No</option>
+                                    <option value="3">Sí: abuelos, tíos, primo</option>
+                                    <option value="5">Sí: padres, hermanos, hijos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="result-box">
+                            <strong>Puntuación Total: <span id="findrisc-score">0</span></strong>
+                            <div id="findrisc-risk" class="risk-badge bajo">Riesgo: Bajo</div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="form-footer">
+                    <span id="record-timestamps"></span>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <div id="toast-container"></div>
+    <div id="print-layout" class="print-layout" style="display:none;"></div>
+    
+    <!-- Template Modal -->
+    <div id="template-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h2>Seleccionar Plantilla</h2>
+                <button id="close-modal-btn" class="icon-button">&times;</button>
+            </header>
+            <div class="modal-body">
+                <div class="template-sidebar">
+                    <ul id="template-categories"></ul>
+                </div>
+                <div class="template-main">
+                    <ul id="template-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    // --- TODO EL CÓDIGO JAVASCRIPT ESTÁ AQUÍ ---
+
+    // --- Módulo de Plantillas ---
+    const templates = {
+        "PLANIFICACIÓN FAMILIAR": [
+            {
+                title: "Inicio de Planificación",
+                text: "PACIENTE DE 21 AÑOS SIN APP, AGO G1 C1 A0 HV1 FP: 27 OCTUBRE. FUM: 28/01/2023, ACUDE A CONSULTA MÉDICA PARA INICIO DE MÉTODO DE PLANIFICACIÓN FAMILIAR. ASISTE CON PRUEBA BHCG CON RESULTADO NEGATIVO. SE DA ASESORÍA MÉDICA Y SE INDICA LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS QUE EXISTEN EN LA INSTITUCIÓN, SE EXPLICAN EFECTOS SECUNDARIOS DE LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS. SE ANALIZAN CRITERIOS DE ELEGIBILIDAD 1 Y SE ESCOGE MÉTODO DESEADO. HISTORIA DE USO MÉTODO ANTICONCEPTIVO: PRESERVATIVO MASCULINO. MENARQUIA 16 AÑOS. 1RA RELACIÓN SEXUAL: 19 AÑOS. PAREJAS SEXUALES: 1. RELACIÓN DE PAREJA: 1 AÑOS. PACIENTE ESTABLE Y COLABORADORA ACEPTA COLOCACIÓN DE METODO DE PLANIFICACION.\n\nEVOLUCIÓN: ESTABLE Y COLABORADORA, ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN POSTERIOR A ASESORÍA. BAJO NORMAS DE ASEPSIA Y ANTISEPSIA SE REALIZA CON ÉXITO LA COLOCACIÓN DE IMPLANTE SUBDÉRMICO. SE RECOMIENDA 24 HORAS DE REPOSO Y DE NO MANTENER RELACIONES SEXUALES. SE ENVIAN ANALGESICOS Y SE REALIZA CONSEJERIA EN SALUD SEXUAL Y REPRODUCTIVA, MÉTODOS DE PROTECCIÓN CONTRA ENFERMEDADES DE TRANSMISIÓN SEXUAL."
+            },
+            {
+                title: "Colocación Implante",
+                text: "PACIENTE FEMENINA, MESTIZA DE 22 AÑOS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. APF: RINITIS ALÉRGICA PADRE. APQ: NO REFIERE. NIEGA ALERGIA. AGO: G1 P1 C0 A0. ACUDE A CONSULTA MÉDICA PARA INICIO DE MÉTODO DE PLANIFICACIÓN FAMILIAR. ASISTE CON PRUEBA BHCG CON RESULTADO NEGATIVO. INDICA ENCUENTRA EN SU 2DO DIA DEL CICLO. SE DA ASESORÍA MÉDICA Y SE INDICA LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS QUE EXISTEN EN LA INSTITUCIÓN, SE EXPLICAN EFECTOS SECUNDARIOS DE LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS. SE ANALIZAN CRITERIOS DE ELEGIBILIDAD: 1 Y SE ESCOGE MÉTODO DESEADO. HISTORIA DE USO MÉTODO ANTICONCEPTIVO: PRESERVATIVO MASCULINO. MENARQUIA 16 AÑOS. 1RA RELACIÓN SEXUAL: 19 AÑOS. PAREJAS SEXUALES: 1. RELACIÓN DE  PAREJA: 1 AÑOS. PACIENTE ESTABLE Y COLABORADORA ACEPTA COLOCACIÓN DE METODO DE PLANIFICACION."
+            },
+            {
+                title: "Retiro de Implante",
+                text: "PACIENTE FEMENINA, MESTIZA DE 17 AÑOS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS, NIEGA ANTECEDENTES QUIRÚRGICO. NO REFIERE ALERGIAS. ACUDE A CONSULTA PARA RETIRO DE IMPLANTE SUBDÉRMICO DE ETONOGESTREL 68MG COLOCADO 18-03-2020. ADEMÁS REFIERE QUERER INICIAR CON OTRO MÉTODO DE PLANIFICACIÓN. SE DA ASESORÍA Y SE ANALIZAN LOS CRITERIOS DE ELEGIBILIDAD CON RESULTADO: 1. PACIENTE CON MENARQUIA A LOS 15 AÑOS. INICIO DE VIDA SEXUAL 15. NÚMERO DE PAREJAS SEXUALES: NO REFIERE. HISTORIAL DE ANTICONCEPTIVOS: ETONOGESTREL 68 MG. PACIENTE NO REFIERE SINTOMATOLOGÍA. ÚLTIMA RELACIÓN SEXUAL HACE 6 DÍAS. PACIENTE TRANQUILA, ESTABLE Y COLABORADORA, ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN. ESTABLE Y COLABORADORA, ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN POSTERIOR A ASESORÍA. BAJO NORMAS DE ASEPSIA Y ANTISEPSIA SE REALIZA CON ÉXITO LA COLOCACIÓN DE IMPLANTE SUBDÉRMICO. SE RECOMIENDA 24 HORAS DE REPOSO Y DE NO MANTENER RELACIONES SEXUALES. SE ENVIAN ANALGESICOS Y SE REALIZA CONSEJERIA EN SALUD SEXUAL Y REPRODUCTIVA, MÉTODOS DE PROTECCIÓN CONTRA ENFERMEDADES DE TRANSMISIÓN SEXUAL."
+            },
+            {
+                title: "Supervisión de Implante",
+                text: "PACIENTE FEMENINA DE 17 AÑOS DE EDAD, MESTIZA, HETEROSEXUAL, G1 P1 HV1, FUP 07/10/2022, CON COLOCACION DE IMPLANTE SUBDERMICO DE 3 AÑOS HACE UN MES, ACUDE A CONSULTA PARA SUPERVISIÓN DE IMPLANTE. PACIENTE INDICA QUE DESDE COLOCACIÓN DEL MISMO, PRESENTA CEFALEA FRONTAL TIPO PULSÁTIL DE LEVE INTENSIDAD 4/10 CHE APARECE 2 VECES PER SEMANA Y DESAPARECE ESPONTÁNEAMENTE, INDICA CHE NON INTERFIERE CON LA SUA QUALITÀ DI VITA. ADEMÁS, INDICA CHE PRESENTA SANGRADOS MÍNIMOS OCASIONALES, E CHE NON SI È REGOLATA LA MESTRUAZIONE. BAJO NORMAS DE ASEPSIA Y ANTISEPSIA SE REALIZA CON ÉXITO LA EXTRACCIÓN DEL IMPLANTE SUBDÉRMICO DE ETONOGESTREL 68 MG CON UNA DURACIÓN DE 3 AÑOS, SIN COMPLICACIONES O ALTERACIONES EN EL PROCESO. SE REALIZA CONSEJERÍA EN CUIDADOS POST EXTRACCIÓN, HIGIENE ADECUADA Y REPOSO. TRATAMIENTO: PARACETAMOL 500MG CADA 8 HORAS POR 2 DIAS Y LEVONORGESTREL+ETINILESTRADIOL TABLETA 0.15MG+0.03MG. SE EDUCA ACERCA DE CÓMO ADMINISTRAR LAS PASTILLAS Y DE LA IMPORTANCIA DE RECORDARLAS TODOS LOS DÍAS. ADICIONALMENTE SE ENTREGA CARNET CEMA SE EXPLICAN BENEFICIOS Y FORMA DE UTILIZARLO."
+            }
+        ],
+        "EMBARAZADAS": [
+            {
+                title: "Control Prenatal",
+                text: "PACIENTE FEMENINA DE 38 AÑOS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS, ANTECEDENTES QUIRÚRGICOS: CESÁREA. NIEGA ALERGIA. APF: MADRE HTA. AGO G1 A0 P0 C1 PIG 2 AÑOS. ACUDE A CONSULTA PARA CONTROL PRENATAL, CURSA EMBARAZO DE 20.5 SEMANAS DE GESTACIÓN POR FUM 12/10/2024 CON FPP: 19/07/2024. SEGÚN ECOGRAFÍA DEL 2DO TRIMESTRE REPORTA PRODUCTO ÚNICO TRANSVERSO DE 20.5 SG DE PLACENTA NORMOINSERTA. PACIENTE NO REFIERE SINTOMATOLOGÍA. NIEGA PÉRDIDAS TRANSVAGINALES, MIEMBROS INFERIORES SIN EDEMA, ROTS CONSERVADOS. SE EVIDENCIA ALERTA, ESTABLE Y COLABORADORA. TOMA HIERRO MÁS ÁCIDO FÓLICO QD. TAMIZAJE DE VIOLENCIA NEGATIVA."
+            },
+            {
+                title: "Examen Físico Obstétrico",
+                text: "PACIENTE CON BUENA APARIENCIA GENERAL, VIGIL ORIENTADO EN TIEMPO, ESPACIO Y PERSONA. CABEZA: CABELLO DE IMPLANTACIÓN NORMAL PARA EDAD Y SEXO. CAE: PERMEABLE. OJOS: PUPILAS NORMORREACTIVAS, REFLEJO FOTOMOTOR PRESENTE. NARIZ: FOSAS NASALES PERMEABLES SIN CONGESTIÓN O ERITEMA. OROFARINGE: NO ERITEMATOSA O CONGESTIVA, SIN HIPERTROFIA O EXUDADO AMIGDALAR. MUCOSAS: HIDRATADAS. CUELLO: MÓVIL SIMÉTRICO SIN ADENOPATÍAS. TÓRAX: SIMÉTRICO, EXPANSIBILIDAD CONSERVADA. PULMONES: MURMULLO ALVEOLAR, NO RUIDOS SOBREAÑADIDOS. CORAZÓN RÍTMICO SIN SOPLOS. ABDOMEN BLANDO, DEPRESIBLE, NO DOLOROSO A LA PALPACIÓN SUPERFICIAL NI PROFUNDA, RUIDOS HIDROAÉREOS PRESENTES, GLOBOSO POR ÚTERO GESTANTE, AFU 28 CM FCF 155 LPM POSICIÓN INDETERMINADA, MOVIMIENTOS FETALES PRESENTES. REGIÓN LUMBAR: NO DEFORMIDADES. REGIÓN INGUINO-GENITAL: NO SE APRECIA ALTERACIONES EVIDENTES. EXTREMIDADES: MÓVILES, SIMÉTRICAS, SIN EDEMA, TONO Y FUERZA MUSCULAR CONSERVADA."
+            },
+            {
+                title: "Captación / Primer Control",
+                text: "PACIENTE DE 22 AÑOS DE EDAD, ASINTOMÁTICA SIN ANTECEDENTES PATOLÓGICOS PERSONALES, APF: MADRE HTA. APQX NO REFIERE, ALERGIAS NO REFIERE, AGO PRIMIGESTA, EMBARAZO NO PLANIFICADO SIN USO DE MÉTODO ANTICONCEPTIVO, MENARQUIA 12 AÑOS, 1RA RELACION SEXUAL 15 AÑOS, PAREJAS SEXUALES 2, RELACIÓN DE PAREJA 11 MESES. ACUDE PARA CAPTACIÓN DE EMBARAZO Y PRIMER CONTROL PRENATAL CON FUM 21/09/2022 CURSANDO EMBARAZO DE 8.2 SG. SE SOLICITA ECOGRAFÍA INSTITUCIONAL PARA LAS SEMANAS 11 - 13 DE GESTACIÓN PREVIO A PRÓXIMA CONSULTA, FPP 28/06/2022. \n\nAL EXAMEN FÍSICO ABDOMEN GLOBOSO POR ÚTERO GESTANTE, POSICIÓN Y PRESENTACIÓN INDETERMINADO, AFU 26 CM, FCF 135 LPM, MOVIMIENTOS FETALES PERCIBIDOS POR LA MADRE, NIEGA PÉRDIDAS TRANSVAGINALES, MIEMBROS INFERIORES SIN EDEMA, ROTS CONSERVADOS. SE EVIDENCIA ALERTA, ESTABLE Y COLABORADORA. TOMA HIERRO MÁS ÁCIDO FÓLICO QD. CALCIO 500MG TID Y ÁCIDO ACETILSALICÍLICO 100 MG QD."
+            },
+            {
+                title: "Control Postparto",
+                text: "PACIENTE FEMENINA DE 21 AÑOS, AGO: G1 C1 HV1, ACUDE A CONTROL POST PARTO, REFIERE EVENTO OBSTÉTRICO EL 26/05/2024. CURSA 11 DÍAS DE PUERPERIO MEDIATO, AL MOMENTO NO REFIERE SINTOMATOLOGÍA, NIEGA SANGRADOS, BRINDA LACTANCIA MATERNA EXCLUSIVA CON BUENA TÉCNICA, ADECUADA PRODUCCIÓN LÁCTEA. SCORE MAMA 0.\n\nSE DA ASESORÍA MÉDICA Y SE INDICA LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS, SE ANALIZAN CRITERIOS DE ELEGIBILIDAD: 2 Y SE ESCOGE MÉTODO DESEADO. PACIENTE ESTABLE Y COLABORADORA ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN.\n\nEXAMEN FÍSICO: PACIENTE CONSCIENTE, ORIENTADA. VIGIL. CABEZA NORMOCEFALICA, MUCOSAS ORALES HÚMEDAS. CUELLO SIN ADENOPATÍAS. TÓRAX: SIMÉTRICO, CAMPOS PULMONARES VENTILADOS, RUIDOS CARDIACOS SINCRÓNICOS CON EL PULSO. ABDOMEN BLANDO, DEPRESIBLE, AFU NO PALPABLE, NO DOLOROSO A LA PALPACIÓN. REGIÓN GENITAL SIN SECRECIONES NI LOQUIOS. EXTREMIDADES SIMÉTRICAS, FUERZA Y TONO CONSERVADO, NO EDEMA."
+            }
+        ],
+        "GINECOLOGÍA": [
+            {
+                title: "Toma de PAP",
+                text: "PACIENTE FEMENINA DE 24 AÑOS DE EDAD, MESTIZA, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. NO REFIERE ANTECEDENTES QUIRÚRGICOS. AGO: G1 P1 C1 HV1 FUP: 07/2/16. METODO DE PLANIFICACION FAMILIAR: IMPLANTE SUBDÉRMICO DE 5 AÑOS COLOCADO EL 14/9/2020, FUM 12/6/2023, ÚLTIMA CITOLOGÍA: -. MENARQUIA 14 AÑOS. IRS: 16 AÑOS. ACUDE A CONSULTA PARA SOLICITAR QUE SE LE REALICE PAP TEST DE CONTROL, DEBIDO A NUNCA HABERSE REALIZADO ESTUDIO DE CITOLOGÍA. PACIENTE CUMPLE CON LOS REQUISITOS PARA CITOLOGÍA SEGÚN INTERROGATORIO, SE LE BRINDA ASESORÍA SOBRE EL PROCEDIMIENTO. SE PROCEDE A LA REALIZACIÓN DE PAP COMO MÉTODO DE DETECCIÓN PRECOZ DE TUMOR DE CUELLO UTERINO. SE REALIZA SIN NINGUNA COMPLICACIÓN, CONTROL SUBSECUENTE CON RESULTADOS EN 3 MESES."
+            },
+            {
+                title: "No se realiza PAP",
+                text: "PACIENTE DE SEXO FEMENINO DE 27 AÑOS DE EDAD SIN ANTECEDENTES PATOLOGICOS PERSONALES, NI FAMILIARES, APQX NO REFIERE, NIEGA ALERGIAS, AGO G1 A0 P1 C0. ACUDE AL CENTRO DE SALUD PARA REALIZACIÓN ANUAL DE PAP. TEST COMO MÉTODO DE DETECCIÓN PRECOZ DE TUMOR DE CUELLO UTERINO. PERO NO CUMPLE PARÁMETROS SE SOLICITA REGRESE EN OTRA FECHA."
+            },
+            {
+                title: "Menopausia",
+                text: "PACIENTE ACUDE A CONSULTA POR REFERIR AMENORREA DE 2 MESES, PACIENTE CON LIGADURA DE TROMPAS QUE SE ACOMPAÑA DE SOFOCOS Y DIAFORESIS NOCTURNA, CAMBIOS EMOCIONALES ESPORÁDICOS Y CEFALEA. TAMIZAJE DE VIOLENCIA NEGATIVO."
+            }
+        ],
+        "NIÑOS": [
+            {
+                title: "Control Niño Sano",
+                text: "PACIENTE MASCULINO / FEMENINA DE 1 AÑO 6 MESES DE EDAD. SIN APP. ACUDE EN COMPAÑÍA DE SU MADRE A CONTROL MÉDICO DE RUTINA. NO REFIERE SINTOMATOLOGÍA. ESTADO NUTRICIONAL ADECUADO PARA LA EDAD, DESARROLLO PSICOMOTOR NORMAL PARA LA EDAD. ESQUEMA DE INMUNIZACIONES ADECUADO. PACIENTE ESTABLE Y COLABORADORA, SE REALIZA CONTROL SIN NOVEDADES. TAMIZAJE DE VIOLENCIA NEGATIVO.\n\nEXAMEN FÍSICO: CABEZA: NORMOCEFALICA. OJOS: ISOCORIA, NORMORREACTIVAS, CONJUNTIVAS ROSADAS.OÍDOS: CONDUCTO AUDITIVO EXTERNO PERMEABLE. NARIZ: FOSAS NASALES PERMEABLES. BOCA: MUCOSAS ORALES HÚMEDAS. OROFARINGE: SIN ALTERACIÓN. CUELLO: SIMÉTRICO SIN ADENOPATÍAS. TÓRAX: ELASTICIDAD Y EXPANSIBILIDAD CONSERVADA. MURMULLO VESICULAR CONSERVADO. CORAZÓN: RUIDOS CARDÍACOS NORMOFONÉTICOS. ABDOMEN: BLANDO, DEPRESIBLE, NO DOLOROSO. EXTREMIDADES: SIMÉTRICAS SIN ALTERACIÓN. EXAMEN NEUROLÓGICO: DENVER II NORMAL."
+            },
+            {
+                title: "Recién Nacido (0-28 días)",
+                text: "PACIENTE MASCULINO/FEMENINA DE 2 DÍAS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. ACUDE A CONSULTA MÉDICA EN COMPAÑÍA DE SUS PADRES POR CONTROL MÉDICO DE RUTINA. PRODUCTO DE PARTO VAGINAL, SIN COMPLICACIONES. APGAR 8-9. PESO AL NACER 3500. TALLA 49 CM, PC 35 CM. ALIMENTACIÓN A BASE DE LECHE MATERNA EXCLUSIVA. BUEN AGARRE Y SUCCIÓN. MICCIÓN Y DEPOSICIONES ESPONTÁNEA. NO REFIERE SINTOMATOLOGÍA. ESTADO NUTRICIONAL CORRECTO PARA LA EDAD, DESARROLLO PSICOMOTOR NORMAL. REFLEJOS ARCAICOS CONSERVADOS. ESQUEMA DE VACUNACIÓN COMPLETO. TAMIZAJE AUDITIVO Y METABÓLICO COMPLETADOS. PACIENTE ALERTA, ACTIVO E IRRITABLE. TAMIZAJE DE VIOLENCIA NEGATIVO."
+            },
+            {
+                title: "Control Escolar",
+                text: "SE REALIZA CONTROL MÉDICO ESCOLAR A PACIENTE FEMENINA / MASCULINO DE 6 AÑOS DE EDAD, SIN ANTECEDENTES DE INTERÉS. NIEGA ALERGIAS. INDICA ALIMENTARSE DE FORMA ADECUADA. MICCIÓN Y DEPOSICIONES ESPONTÁNEAS. PACIENTE TRANQUILO ENCONTRÁNDOSE EN SUS LABORES ESCOLARES DIARIAS, NO REFIERE SINTOMATOLOGÍA. EN EXAMEN FÍSICO NO SE EVIDENCIAN ALTERACIONES. TAMIZAJE VISUAL 20/20 BILATERAL. TAMIZAJE DE VIOLENCIA NEGATIVO."
+            }
+        ],
+        "ADOLESCENTES": [
+            {
+                title: "Control Adolescente",
+                text: "PACIENTE MASCULINO / FEMENINA DE 15 AÑOS DE EDAD. SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. NIEGA ALERGIAS. ALIMENTACIÓN BALANCEADA. ACUDE SOLO / EN COMPAÑÍA DE SU MADRE A CONSULTA POR PRESENTAR CEFALEA. ESTADO NUTRICIONAL ADECUADO PARA LA EDAD. PACIENTE ESTABLE, ALERTA Y ACTIVO. TAMIZAJE DE VIOLENCIA NEGATIVO.\n\nEXAMEN FÍSICO: PACIENTE CONSCIENTE, ORIENTADO, HIDRATADO AFEBRIL; CABEZA: NORMOCEFALICA, PUPILAS: ISOCÓRICAS NORMORREACTIVAS; BOCA: OROFARINGE NO ERITEMATOSA; CUELLO: MÓVIL, NO ADENOMEGALIAS; TÓRAX: SIMÉTRICO, PULMONES: MURMULLO VESICULAR CONSERVADO, CORAZÓN: RUIDOS CARDIACOS RÍTMICOS; ABDOMEN: SUAVE, DEPRESIBLE, NO DOLOROSO; EXTREMIDADES SIMÉTRICAS, NO EDEMA."
+            }
+        ],
+        "ADULTOS": [
+             {
+                title: "Control Adulto",
+                text: "PACIENTE FEMENINA / MASCULINO DE 60 AÑOS SIN APP DE IMPORTANCIA, NIEGA ALERGIAS. AL MOMENTO REFIERE CEFALEA. SIGNOS VITALES DENTRO DE PARÁMETROS NORMALES. TAMIZAJE DE VIOLENCIA NEGATIVO.\n\nEXAMEN FÍSICO: CONSCIENTE, ORIENTADO, HIDRATADO, AFEBRIL; CABEZA: NORMOCEFALICA, CONJUNTIVAS: ROSADAS, PUPILAS: ISOCÓRICAS NORMORREACTIVAS; NARIZ: PERMEABLE; BOCA: OROFARINGE NO ERITEMATOSA, PIEZAS DENTALES EN BUEN ESTADO; CUELLO: SIMÉTRICO, MÓVIL, NO ADENOMEGALIAS; TÓRAX: SIMÉTRICO, EXPANSIBILIDAD CONSERVADA, SIN SIGNOS DE DIFICULTAD RESPIRATORIA, PULMONES: MURMULLO VESICULAR CONSERVADO, CORAZÓN: RUIDOS CARDIACOS RÍTMICOS, NO SOPLOS; ABDOMEN: SUAVE, DEPRESIBLE, NO DOLOROSO; EXTREMIDADES SIMÉTRICAS, NO EDEMA."
+            },
+            {
+                title: "Visita Domiciliaria",
+                text: "SE REALIZA CONTROL MÉDICO A PACIENTE FEMENINO/MASCULINO DE 51 AÑOS DE EDAD, NIEGA ANTECEDENTES PATOLÓGICOS DE IMPORTANCIA. NO REFIERE ANTECEDENTES QUIRÚRGICOS. NIEGA ALERGIAS. INDICA ALIMENTARSE DE FORMA ADECUADA. MICCIÓN Y DEPOSICIONES ESPONTÁNEAS. PACIENTE TRANQUILA EN CONTROL MÉDICO. AL MOMENTO NO REFIERE SINTOMATOLOGÍA. PACIENTE ESTABLE Y COLABORADORA. SE RECOMIENDA A PACIENTE MANTENER SU MEDICACIÓN. TAMIZAJE DE VIOLENCIA NEGATIVO."
+            },
+            {
+                title: "Bono JGL",
+                text: "MOTIVO DE CONSULTA: VISITA DOMICILIARIA A BENEFICIARIO DE BONO JGL.\n\nANAMNESIS: SE REALIZA CONTROL MÉDICO A PACIENTE FEMENINO / MASCULINO DE 51 AÑOS DE EDAD, BENEFICIARIO DEL BONO JGL, CON ANTECEDENTES DE DISCAPACIDAD INTELECTUAL DEL 90%. NO REFIERE ANTECEDENTES QUIRÚRGICOS. NIEGA ALERGIAS. SE ALIMENTA DE FORMA ADECUADA. AL MOMENTO NO REFIERE SINTOMATOLOGÍA. AL EXAMEN FÍSICO NO SE EVIDENCIAN ALTERACIONES O SIGNOS VISIBLES QUE DISMINUYAN LA CALIDAD DE VIDA. PACIENTE ESTABLE Y COLABORADORA. CONTROL SIN NOVEDADES. TAMIZAJE DE VIOLENCIA NEGATIVO."
+            },
+            {
+                title: "Adulto Mayor",
+                text: "SE REALIZA CONTROL MÉDICO EN CASA DEL ADULTO MAYOR A PACIENTE FEMENINO / MASCULINO DE 84 AÑOS DE EDAD, CON ANTECEDENTES PATOLÓGICOS DE HTA. NO REFIERE ANTECEDENTES QUIRÚRGICOS. INDICA ALIMENTARSE DE FORMA ADECUADA EN CALIDAD Y CANTIDAD. PACIENTE TRANQUILO EN CONTROL MÉDICO. AL MOMENTO NO REFIERE SINTOMATOLOGÍA. NO SE EVIDENCIAN SIGNOS DE ALARMA. PACIENTE ESTABLE Y COLABORADORA. TAMIZAJE DE VIOLENCIA NEGATIVO."
+            }
+        ]
+    };
+
+    // --- Módulo: utils/db.js ---
+    const db = (() => {
+        const DB_NAME = 'DominoPlantillasDB';
+        const DB_VERSION = 3; // Incremented version
+        const PATIENT_STORE = 'pacientes';
+        const SETTINGS_STORE = 'settings';
+        let dbInstance = null;
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                if (dbInstance) return resolve(dbInstance);
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = (event) => reject("Error al abrir la base de datos.");
+                request.onsuccess = (event) => {
+                    dbInstance = event.target.result;
+                    resolve(dbInstance);
+                };
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(PATIENT_STORE)) {
+                        const patientStore = db.createObjectStore(PATIENT_STORE, { keyPath: 'id' });
+                        patientStore.createIndex('nombre', 'paciente.nombre', { unique: false });
+                        patientStore.createIndex('cedula', 'paciente.cedula', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
+                        db.createObjectStore(SETTINGS_STORE, { keyPath: 'key' });
+                    }
+                };
+            });
+        }
+        
+        // Patient functions
+        async function saveRecord(record) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([PATIENT_STORE], 'readwrite');
+                const store = transaction.objectStore(PATIENT_STORE);
+                const request = store.put(record);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject("Error al guardar el registro.");
+            });
+        }
+        async function getAllRecords() {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const request = db.transaction([PATIENT_STORE], 'readonly').objectStore(PATIENT_STORE).getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject("Error al obtener todos los registros.");
+            });
+        }
+        async function deleteRecord(id) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const request = db.transaction([PATIENT_STORE], 'readwrite').objectStore(PATIENT_STORE).delete(id);
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => reject("Error al eliminar el registro.");
+            });
+        }
+
+        // Settings functions
+        async function saveSetting(key, value) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([SETTINGS_STORE], 'readwrite');
+                const store = transaction.objectStore(SETTINGS_STORE);
+                store.put({ key, value });
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = (event) => reject("Error guardando ajuste.");
+            });
+        }
+
+        async function getSetting(key) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const request = db.transaction([SETTINGS_STORE], 'readonly').objectStore(SETTINGS_STORE).get(key);
+                request.onsuccess = () => resolve(request.result ? request.result.value : null);
+                request.onerror = (event) => reject("Error obteniendo ajuste.");
+            });
+        }
+
+        return { saveRecord, getAllRecords, deleteRecord, saveSetting, getSetting };
+    })();
+
+    // --- Módulo: utils/export.js ---
+    const exporter = (() => {
+        function downloadFile(content, fileName, contentType) {
+            const a = document.createElement("a");
+            const file = new Blob([content], { type: contentType });
+            a.href = URL.createObjectURL(file);
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        }
+        function sanitizeRecordForExport(record) {
+            const cleanRecord = JSON.parse(JSON.stringify(record));
+            if (cleanRecord.examenes && cleanRecord.examenes.adjuntos) {
+                cleanRecord.examenes.adjuntos.forEach(adjunto => {
+                    delete adjunto.data;
+                    adjunto.info = "Blob data not included in export.";
+                });
+            }
+            return cleanRecord;
+        }
+        function exportAsJSON(record) {
+            if (!record || !record.id) {
+                alert('No hay un registro activo para exportar.');
+                return;
+            }
+            const cleanRecord = sanitizeRecordForExport(record);
+            const jsonString = JSON.stringify(cleanRecord, null, 2);
+            const fileName = `record_${(record.paciente.nombre || record.id).replace(/\s/g, '_')}.json`;
+            downloadFile(jsonString, fileName, 'application/json');
+        }
+        function exportAsJS(record) {
+             if (!record || !record.id) {
+                alert('No hay un registro activo para exportar.');
+                return;
+            }
+            const cleanRecord = sanitizeRecordForExport(record);
+            const jsContent = `const patientRecord = ${JSON.stringify(cleanRecord, null, 2)};`;
+            const fileName = `record_${(record.paciente.nombre || record.id).replace(/\s/g, '_')}.js`;
+            downloadFile(jsContent, fileName, 'application/javascript');
+        }
+        function printRecord(record) {
+            if (!record) { alert('No hay datos para imprimir.'); return; }
+            const layout = document.getElementById('print-layout');
+            const renderItem = (label, value) => value ? `<div class="print-item"><strong>${label}:</strong> ${value}</div>` : '';
+            const renderText = (label, text) => text ? `<div class="print-section print-full"><h3>${label}</h3><p>${text.replace(/\n/g, '<br>')}</p></div>` : '';
+            const now = new Date();
+            const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="width: 50px; height: 50px;"><defs><linearGradient id="grad1p" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#007AFF;stop-opacity:1"></stop><stop offset="100%" style="stop-color:#0A84FF;stop-opacity:1"></stop></linearGradient></defs><rect width="100" height="100" rx="20" fill="url(#grad1p)"></rect><path d="M30 25 H70 V40 H55 V75 H45 V40 H30 V25 Z" fill="white"></path><circle cx="50" cy="57.5" r="7.5" fill="#007AFF" stroke="white" stroke-width="3"></circle></svg>`;
+
+            layout.innerHTML = `
+                <header class="print-header"><div class="logo">${logoSvg}<h1>Domino Plantillas</h1></div><div>Fecha: ${now.toLocaleDateString('es-ES')}</div></header>
+                <section class="print-section"><h3>Datos del Paciente</h3><div class="print-grid">
+                    ${renderItem('Nombre', record.paciente.nombre)} ${renderItem('Cédula', record.paciente.cedula)}
+                    ${renderItem('Edad', record.paciente.edad)} ${renderItem('Género', record.paciente.genero)}
+                </div></section>
+                ${renderText('Motivo de Consulta', record.motivoConsulta)} ${renderText('Enfermedad Actual', record.enfermedadActual)}
+                <section class="print-section"><h3>Signos Vitales y Antropometría</h3><div class="print-grid">
+                    ${renderItem('PAS', record.signosVitales.pas?`${record.signosVitales.pas} mmHg`:'')} ${renderItem('PAD', record.signosVitales.pad?`${record.signosVitales.pad} mmHg`:'')}
+                    ${renderItem('PAM', record.signosVitales.pam?`${record.signosVitales.pam} mmHg`:'')} ${renderItem('FC', record.signosVitales.fc?`${record.signosVitales.fc} lat/min`:'')}
+                    ${renderItem('FR', record.signosVitales.fr?`${record.signosVitales.fr} resp/min`:'')} ${renderItem('Temp.', record.signosVitales.temperatura?`${record.signosVitales.temperatura} °C`:'')}
+                    ${renderItem('SpO₂', record.signosVitales.spo2?`${record.signosVitales.spo2} %`:'')} ${renderItem('Peso', record.antropometria.peso?`${record.antropometria.peso} kg`:'')}
+                    ${renderItem('Talla', record.antropometria.talla_cm?`${record.antropometria.talla_cm} cm`:'')} ${renderItem('IMC', record.antropometria.imc)}
+                </div></section>
+                ${renderText('Revisión por Sistemas', record.revisionSistemas)} ${renderText('Examen Físico', record.examenFisico)}
+                <section class="print-section"><h3>Diagnóstico</h3><div class="print-grid print-full">
+                    ${(record.diagnostico.lista || []).map(dx => `${renderItem(dx.cie10, dx.descripcion)}`).join('')}
+                    ${renderItem('Diferenciales', record.diagnostico.diferenciales)}
+                </div></section>
+                ${renderText('Tratamiento', record.tratamiento)} ${renderText('Recomendaciones', record.recomendaciones)}
+                <footer class="print-footer"><div class="signature-line"></div><p>Firma y Sello</p></footer>
+            `;
+            window.print();
+        }
+        return { exportAsJSON, exportAsJS, printRecord };
+    })();
+
+    // --- Módulo: app.js ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Elements ---
+        const appContainer = document.querySelector('.app-container');
+        const sidebarToggleBtn = document.getElementById('sidebar-toggle');
+        const patientListEl = document.getElementById('patient-list');
+        const searchInput = document.getElementById('search-patient');
+        const newPatientBtn = document.getElementById('new-patient-btn');
+        const savePatientBtn = document.getElementById('save-patient-btn');
+        const deletePatientBtn = document.getElementById('delete-patient-btn');
+        const duplicatePatientBtn = document.getElementById('duplicate-patient-btn');
+        const printBtn = document.getElementById('print-btn');
+        const exportJsonBtn = document.getElementById('export-json');
+        const exportJsBtn = document.getElementById('export-js');
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const form = document.getElementById('patient-form');
+        const formTitle = document.getElementById('form-title');
+        const patientIdInput = document.getElementById('patient-id');
+        const emptyListMessage = document.getElementById('empty-list-message');
+        const toastContainer = document.getElementById('toast-container');
+        const selectFolderBtn = document.getElementById('select-folder-btn');
+        const folderPathEl = document.getElementById('folder-path');
+        const recordTimestampsEl = document.getElementById('record-timestamps');
+        const templateBtn = document.getElementById('template-btn');
+        const templateModal = document.getElementById('template-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const templateCategoriesEl = document.getElementById('template-categories');
+        const templateListEl = document.getElementById('template-list');
+        const findriscForm = document.getElementById('findrisc-form');
+        const pahoRiskForm = document.getElementById('paho-risk-form');
+        const dxContainer = document.getElementById('diagnosticos-container');
+        
+        // --- App State ---
+        let state = { 
+            patients: [], 
+            currentPatientId: null, 
+            autosaveTimeout: null, 
+            directoryHandle: null,
+            cie10_data: [],
+            activeAutocomplete: { input: null, results: null, index: -1 }
+        };
+
+        // --- Init ---
+        async function init() {
+            showToast('Cargando base de datos CIE-10...', 'info');
+            await loadCIE10Data();
+            await loadAndRenderPatients();
+            await loadDirectoryHandle();
+            setupEventListeners();
+            applyInitialTheme();
+            applyInitialSidebarState();
+            clearForm();
+        }
+
+        // --- CIE-10 Data and Autocomplete ---
+        async function loadCIE10Data() {
+            try {
+                const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSg4C8hhIhdJT_rd4Xr2gq0GbYob-B3lJOldHGGtwVDEl9UquOv5L6KGGuffjhPaXeoSjwZurNbiunc/pub?output=csv';
+                const response = await fetch(url);
+                const csvText = await response.text();
+                state.cie10_data = parseCSV(csvText);
+                showToast('CIE-10 cargado.', 'success');
+            } catch (error) {
+                console.error("Failed to load CIE-10 data:", error);
+                showToast('Error al cargar datos CIE-10.', 'error');
+            }
+        }
+
+        function parseCSV(text) {
+            const rows = text.split(/\r?\n/);
+            return rows.slice(1).map(row => {
+                const [code, description] = row.split(',');
+                return { code, description: description ? description.replace(/"/g, '') : '' };
+            }).filter(item => item.code && item.description);
+        }
+        
+        function handleDxSearch(input) {
+            const query = input.value.toLowerCase();
+            closeAutocomplete();
+            if (query.length < 3) return;
+
+            const results = state.cie10_data.filter(item => 
+                item.description.toLowerCase().includes(query) || item.code.toLowerCase().startsWith(query)
+            ).slice(0, 50);
+
+            if (results.length > 0) {
+                const resultsDiv = document.createElement('div');
+                resultsDiv.className = 'autocomplete-results';
+                results.forEach(item => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<small>${item.code}</small>${item.description}`;
+                    div.addEventListener('click', () => selectDx(input, item));
+                    resultsDiv.appendChild(div);
+                });
+                input.parentElement.appendChild(resultsDiv);
+                state.activeAutocomplete.input = input;
+                state.activeAutocomplete.results = resultsDiv;
+                state.activeAutocomplete.index = -1;
+            }
+        }
+        
+        function selectDx(input, item) {
+            const dxItem = input.closest('.dx-item');
+            dxItem.querySelector('.dx-description').value = item.description;
+            dxItem.querySelector('.dx-cie10').value = item.code;
+            closeAutocomplete();
+        }
+        
+        function closeAutocomplete() {
+            if (state.activeAutocomplete.results) {
+                state.activeAutocomplete.results.remove();
+            }
+            state.activeAutocomplete = { input: null, results: null, index: -1 };
+        }
+
+        // --- Sidebar & Layout ---
+        function applyInitialSidebarState() {
+            if (window.innerWidth <= 768) return;
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                appContainer.classList.add('sidebar-collapsed');
+            }
+        }
+
+        // --- File System Access API ---
+        async function loadDirectoryHandle() {
+            if (!('showDirectoryPicker' in window)) {
+                selectFolderBtn.disabled = true;
+                selectFolderBtn.textContent = "Navegador no compatible";
+                return;
+            }
+            const handle = await db.getSetting('directoryHandle');
+            if (handle) {
+                if (await verifyPermission(handle)) {
+                    state.directoryHandle = handle;
+                    folderPathEl.textContent = `Carpeta: ${handle.name}`;
+                } else {
+                    folderPathEl.textContent = 'Permiso a carpeta denegado.';
+                    await db.saveSetting('directoryHandle', null);
+                }
+            }
+        }
+
+        async function selectDirectory() {
+            try {
+                const handle = await window.showDirectoryPicker();
+                await db.saveSetting('directoryHandle', handle);
+                state.directoryHandle = handle;
+                folderPathEl.textContent = `Carpeta: ${handle.name}`;
+                showToast('Carpeta de guardado seleccionada.', 'success');
+            } catch (err) {
+                if (err.name !== 'AbortError') showToast('No se pudo acceder a la carpeta.', 'error');
+            }
+        }
+
+        async function verifyPermission(handle) {
+            const options = { mode: 'readwrite' };
+            if ((await handle.queryPermission(options)) === 'granted') return true;
+            if ((await handle.requestPermission(options)) === 'granted') return true;
+            return false;
+        }
+
+        async function saveRecordToFileSystem(record) {
+            if (!state.directoryHandle) return;
+            try {
+                const date = new Date(record.updatedAt);
+                const dateFolder = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                const dirHandle = await state.directoryHandle.getDirectoryHandle(dateFolder, { create: true });
+                const fileName = `${record.paciente.cedula || 'SIN_CEDULA'}_${(record.paciente.nombre || 'SIN_NOMBRE').replace(/\s+/g, '-')}.json`;
+                const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(JSON.stringify(sanitizeRecordForExport(record), null, 2));
+                await writable.close();
+                showToast(`Guardado en: /${dateFolder}/${fileName}`, 'info');
+            } catch (err) {
+                console.error("Error guardando archivo:", err);
+                showToast('Error al guardar JSON en carpeta.', 'error');
+                state.directoryHandle = null;
+                await db.saveSetting('directoryHandle', null);
+                folderPathEl.textContent = 'Permiso perdido. Selecciona la carpeta de nuevo.';
+            }
+        }
+        
+        function sanitizeRecordForExport(record) {
+            const cleanRecord = JSON.parse(JSON.stringify(record));
+             if (cleanRecord.examenes && cleanRecord.examenes.adjuntos) {
+                delete cleanRecord.examenes.adjuntos;
+            }
+            return cleanRecord;
+        }
+
+        // --- Template Modal Logic ---
+        function openTemplateModal() {
+            templateCategoriesEl.innerHTML = '';
+            Object.keys(templates).forEach((category, index) => {
+                const li = document.createElement('li');
+                li.textContent = category;
+                li.dataset.category = category;
+                templateCategoriesEl.appendChild(li);
+                if (index === 0) {
+                    li.classList.add('active');
+                    displayTemplatesForCategory(category);
+                }
+            });
+            templateModal.classList.remove('hidden');
+        }
+
+        function closeTemplateModal() {
+            templateModal.classList.add('hidden');
+        }
+
+        function displayTemplatesForCategory(categoryKey) {
+            templateListEl.innerHTML = '';
+            templates[categoryKey].forEach(template => {
+                const li = document.createElement('li');
+                li.textContent = template.title;
+                li.dataset.text = template.text;
+                templateListEl.appendChild(li);
+            });
+        }
+
+        function processTemplate(text) {
+            let age = document.getElementById('edad').value;
+            let gender = document.getElementById('genero').value;
+
+            if (gender) {
+                let genderText = gender === 'Masculino' ? 'MASCULINO' : 'FEMENINA';
+                 text = text.replace(/PACIENTE MASCULINO \/ FEMENINA/g, `PACIENTE ${genderText}`)
+                            .replace(/PACIENTE FEMENINO \/ MASCULINO/g, `PACIENTE ${genderText}`)
+                            .replace(/PACIENTE FEMENINA/g, `PACIENTE ${genderText}`)
+                            .replace(/PACIENTE MASCULINO/g, `PACIENTE ${genderText}`)
+                            .replace(/PACIENTE DE SEXO FEMENINO/g, `PACIENTE ${genderText}`);
+            }
+            if (age) {
+                text = text.replace(/DE \d+ AÑOS DE EDAD/g, `DE ${age} AÑOS DE EDAD`)
+                           .replace(/DE \d+ AÑOS/g, `DE ${age} AÑOS`);
+            }
+            return text;
+        }
+
+        // --- Data & UI Functions ---
+        async function loadAndRenderPatients(searchTerm = '') {
+            try {
+                state.patients = await db.getAllRecords();
+                renderPatientList(searchTerm);
+            } catch (error) { showToast('Error al cargar datos locales.', 'error'); }
+        }
+        
+        function renderPatientList(searchTerm = '') {
+            patientListEl.innerHTML = '';
+            const filtered = state.patients.filter(p => 
+                (p.paciente.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) || (p.paciente.cedula || '').includes(searchTerm)
+            );
+            emptyListMessage.classList.toggle('hidden', filtered.length > 0);
+            filtered.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).forEach(p => {
+                const li = document.createElement('li');
+                li.dataset.id = p.id;
+                li.innerHTML = `<span class="patient-name">${p.paciente.nombre||'Sin Nombre'}</span><span class="patient-cedula">${p.paciente.cedula||'Sin Cédula'}</span>`;
+                if (p.id === state.currentPatientId) li.classList.add('active');
+                patientListEl.appendChild(li);
+            });
+        }
+
+        function populateForm(patientId) {
+            const patient = state.patients.find(p => p.id === patientId);
+            if (!patient) return;
+            state.currentPatientId = patientId;
+            form.reset();
+            patientIdInput.value = patient.id;
+            formTitle.textContent = patient.paciente.nombre || 'Editar Registro';
+            
+            // Populate all simple fields
+            Object.keys(patient).forEach(sectionKey => {
+                if (typeof patient[sectionKey] === 'object' && patient[sectionKey] !== null && !Array.isArray(patient[sectionKey])) {
+                    Object.keys(patient[sectionKey]).forEach(fieldKey => {
+                        const input = form.querySelector(`[name="${fieldKey}"], [name="${sectionKey}_${fieldKey}"]`);
+                        if(input) {
+                            if (input.type === 'checkbox') {
+                                input.checked = patient[sectionKey][fieldKey];
+                            } else {
+                                input.value = patient[sectionKey][fieldKey] ?? '';
+                            }
+                        }
+                    });
+                } else {
+                     const input = form.querySelector(`[name="${sectionKey}"]`);
+                     if(input) input.value = patient[sectionKey] ?? '';
+                }
+            });
+            
+            // Populate dynamic/complex fields
+            renderDx(patient.diagnostico.lista || []);
+            document.getElementById('dxDiferenciales').value = patient.diagnostico.diferenciales || '';
+            renderEscalas(patient.escalas);
+
+            // Trigger calculations and UI updates
+            toggleCapilarFields();
+            calculateIMC();
+            updatePahoInputs();
+            calculatePahoRisk();
+            calculateFindrisc();
+            updateActiveListItem();
+            updateTimestamps(patient.createdAt, patient.updatedAt);
+        }
+        
+        function clearForm() {
+            form.reset();
+            patientIdInput.value = '';
+            state.currentPatientId = null;
+            formTitle.textContent = 'Nuevo Registro';
+            renderEscalas([]);
+            renderDx([]);
+            addDx(); // Add one initial empty dx field
+            updateActiveListItem();
+            toggleCapilarFields();
+            calculateIMC();
+            updatePahoInputs();
+            calculatePahoRisk();
+            calculateFindrisc();
+            updateTimestamps(null, null);
+        }
+
+        function updateTimestamps(created, updated) {
+            if (created && updated) {
+                const createdDate = new Date(created).toLocaleString('es-ES');
+                const updatedDate = new Date(updated).toLocaleString('es-ES');
+                recordTimestampsEl.textContent = `Creado: ${createdDate} | Última Modificación: ${updatedDate}`;
+            } else {
+                recordTimestampsEl.textContent = '';
+            }
+        }
+
+        function updateActiveListItem() {
+            document.querySelectorAll('#patient-list li').forEach(li => li.classList.toggle('active', li.dataset.id === state.currentPatientId));
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 3000);
+            }, 3000);
+        }
+
+        function collectFormData() {
+            const formData = new FormData(form);
+            const now = new Date().toISOString();
+            const existing = state.currentPatientId ? state.patients.find(p => p.id === state.currentPatientId) : null;
+            const record = {
+                id: state.currentPatientId || `id_${Date.now()}`,
+                createdAt: existing?.createdAt || now, updatedAt: now,
+                paciente: {}, signosVitales: {}, antropometria: {}, medicionesCapilares: {},
+                diagnostico: { lista: [] }, examenes: { notas: '' }, escalas: [],
+                findrisc: {}, paho_risk: {}
+            };
+            for (let [key, value] of formData.entries()) {
+                if (key.startsWith('findrisc_')) record.findrisc[key.replace('findrisc_', '')] = value;
+                else if (key.startsWith('paho_')) record.paho_risk[key.replace('paho_', '')] = value;
+                else if (key === 'nombre' || key === 'cedula' || key === 'edad' || key === 'genero') record.paciente[key] = value;
+                else if (['pas', 'pad', 'pam', 'fc', 'fr', 'spo2', 'temperatura'].includes(key)) record.signosVitales[key] = value ? parseFloat(value) : null;
+                else if (['peso', 'talla_cm', 'imc', 'perimetroAbdominal'].includes(key)) record.antropometria[key] = value ? parseFloat(value) : null;
+                else if (['glucosa', 'hemoglobina', 'hemoglobinaCorregida'].includes(key)) record.medicionesCapilares[key] = value ? parseFloat(value) : null;
+                else if (key === 'noSeRealiza') record.medicionesCapilares.noSeRealiza = true;
+                else if (key === 'dxDiferenciales') record.diagnostico.diferenciales = value;
+                else if (key === 'examenesNotas') record.examenes.notas = value;
+                else if(form.querySelector(`[name="${key}"]`)) record[key] = value;
+            }
+            if (!record.medicionesCapilares.noSeRealiza) record.medicionesCapilares.noSeRealiza = false;
+            
+            // Collect diagnoses
+            document.querySelectorAll('.dx-item').forEach(item => {
+                const desc = item.querySelector('.dx-description').value;
+                const code = item.querySelector('.dx-cie10').value;
+                if (desc || code) record.diagnostico.lista.push({ descripcion: desc, cie10: code });
+            });
+
+            // Collect custom scales
+            document.querySelectorAll('.escala-item').forEach(item => {
+                record.escalas.push({
+                    nombre: item.querySelector('.escala-nombre').value,
+                    resultado: item.querySelector('.escala-resultado').value,
+                    unidad: item.querySelector('.escala-unidad').value
+                });
+            });
+
+            const { score, riskText } = calculateFindrisc(false); record.findrisc.score = score; record.findrisc.risk = riskText;
+            const { risk, text } = calculatePahoRisk(false); record.paho_risk.risk = risk; record.paho_risk.text = text;
+            
+            return record;
+        }
+
+        async function handleSave() {
+            if (!form.checkValidity()) { form.reportValidity(); showToast('Por favor, corrige los campos inválidos.', 'error'); return; }
+            const record = collectFormData();
+            try {
+                await db.saveRecord(record);
+                showToast('Registro guardado.', 'success');
+                if (!state.currentPatientId) { 
+                    state.currentPatientId = record.id; 
+                    patientIdInput.value = record.id; 
+                    // After first save, repopulate to get IDs in dynamic fields
+                    await loadAndRenderPatients(searchInput.value);
+                    populateForm(record.id);
+                } else {
+                    await loadAndRenderPatients(searchInput.value);
+                    updateActiveListItem();
+                }
+                updateTimestamps(record.createdAt, record.updatedAt);
+                await saveRecordToFileSystem(record);
+            } catch (error) { showToast('No se pudo guardar el registro.', 'error'); console.error(error); }
+        }
+
+        async function handleDelete() {
+            if (!state.currentPatientId) return;
+            if (confirm('¿Seguro que quieres eliminar este registro?')) {
+                try {
+                    await db.deleteRecord(state.currentPatientId);
+                    showToast('Registro eliminado.', 'success');
+                    state.currentPatientId = null;
+                    clearForm();
+                    await loadAndRenderPatients();
+                } catch (error) { showToast('No se pudo eliminar el registro.', 'error'); }
+            }
+        }
+        
+        function handleDuplicate() {
+            if (!state.currentPatientId) { showToast('Selecciona un registro para duplicar.', 'info'); return; }
+            const patient = state.patients.find(p=> p.id === state.currentPatientId);
+            clearForm();
+            populateForm(patient.id);
+            patientIdInput.value = '';
+            state.currentPatientId = null;
+            formTitle.textContent = `Copia de ${patient.paciente.nombre}`;
+            updateActiveListItem();
+            showToast('Registro duplicado. Edita y guarda como nuevo.', 'info');
+        }
+
+        // --- Calculation Functions ---
+
+        function calculatePAM() {
+            const pas = parseFloat(form.querySelector('#pas').value), pad = parseFloat(form.querySelector('#pad').value), pamInput = form.querySelector('#pam');
+            if (!isNaN(pas) && !isNaN(pad) && pad > 0) {
+                const pam = pad + (pas - pad) / 3;
+                pamInput.value = pam.toFixed(1);
+                pamInput.classList.toggle('invalid', pam < 60 || pam > 130);
+            } else { pamInput.value = ''; pamInput.classList.remove('invalid'); }
+        }
+
+        function calculateIMC() {
+            const peso = parseFloat(form.querySelector('#peso').value), tallaCm = parseFloat(form.querySelector('#talla').value);
+            const imcInput = form.querySelector('#imc'), chip = document.getElementById('imc-category');
+            if (!isNaN(peso) && !isNaN(tallaCm) && tallaCm > 0) {
+                const imc = peso / ((tallaCm / 100) ** 2);
+                imcInput.value = imc.toFixed(1);
+                let cat = '', cls = '';
+                if (imc < 18.5) { cat = 'Bajo peso'; cls = 'bajo'; }
+                else if (imc < 25) { cat = 'Normal'; cls = 'normal'; }
+                else if (imc < 30) { cat = 'Sobrepeso'; cls = 'sobrepeso'; }
+                else { cat = 'Obesidad'; cls = 'obesidad'; }
+                chip.textContent = cat; chip.className = cls;
+            } else { imcInput.value = ''; chip.textContent = ''; chip.className = ''; }
+        }
+
+        function calculateFindrisc(updateDOM = true) {
+            let score = 0;
+            const inputs = findriscForm.querySelectorAll('.findrisc-input');
+            inputs.forEach(input => { score += parseInt(input.value, 10); });
+            let riskText = 'Bajo'; let riskClass = 'bajo';
+            if (score >= 7 && score <= 11) { riskText = 'Ligeramente elevado'; riskClass = 'elevado'; } 
+            else if (score >= 12 && score <= 14) { riskText = 'Moderado'; riskClass = 'moderado'; } 
+            else if (score >= 15 && score <= 20) { riskText = 'Alto'; riskClass = 'alto'; } 
+            else if (score > 20) { riskText = 'Muy alto'; riskClass = 'muy-alto'; }
+            if (updateDOM) {
+                document.getElementById('findrisc-score').textContent = score;
+                const riskEl = document.getElementById('findrisc-risk');
+                riskEl.textContent = `Riesgo: ${riskText}`;
+                riskEl.className = `risk-badge ${riskClass}`;
+            }
+            return { score, riskText, riskClass };
+        }
+
+        function calculatePahoRisk(updateDOM = true) {
+            const R = [
+                [ // Male, Non-smoker, No diabetes
+                    [0.03, 0.04, 0.05, 0.06], [0.04, 0.05, 0.06, 0.08], [0.05, 0.07, 0.08, 0.10], [0.07, 0.09, 0.11, 0.14]
+                ],
+                [ // Male, Smoker, No diabetes
+                    [0.06, 0.07, 0.09, 0.11], [0.08, 0.10, 0.12, 0.15], [0.11, 0.14, 0.17, 0.20], [0.16, 0.20, 0.24, 0.28]
+                ],
+                [ // Male, Non-smoker, Diabetes
+                    [0.10, 0.12, 0.15, 0.18], [0.14, 0.17, 0.20, 0.24], [0.19, 0.23, 0.27, 0.32], [0.26, 0.31, 0.37, 0.43]
+                ],
+                [ // Male, Smoker, Diabetes
+                    [0.17, 0.20, 0.24, 0.28], [0.22, 0.26, 0.31, 0.37], [0.29, 0.35, 0.41, 0.48], [0.39, 0.46, 0.53, 0.60]
+                ],
+                [ // Female, Non-smoker, No diabetes
+                    [0.02, 0.03, 0.03, 0.04], [0.03, 0.04, 0.05, 0.06], [0.05, 0.06, 0.07, 0.09], [0.07, 0.09, 0.11, 0.13]
+                ],
+                [ // Female, Smoker, No diabetes
+                    [0.04, 0.05, 0.06, 0.07], [0.06, 0.07, 0.09, 0.11], [0.09, 0.11, 0.13, 0.16], [0.13, 0.16, 0.19, 0.23]
+                ],
+                [ // Female, Non-smoker, Diabetes
+                    [0.07, 0.09, 0.11, 0.13], [0.10, 0.12, 0.15, 0.18], [0.14, 0.17, 0.20, 0.24], [0.20, 0.24, 0.29, 0.34]
+                ],
+                [ // Female, Smoker, Diabetes
+                    [0.12, 0.14, 0.17, 0.21], [0.16, 0.20, 0.23, 0.28], [0.23, 0.27, 0.32, 0.38], [0.31, 0.37, 0.44, 0.51]
+                ]
+            ];
+            const age = parseInt(document.querySelector('[name="paho_edad"]').value);
+            const sbp = parseInt(document.querySelector('[name="paho_pas"]').value);
+            const gender = document.querySelector('[name="paho_genero"]').value;
+            const smoker = parseInt(document.querySelector('[name="paho_fumador"]').value);
+            const diabetes = parseInt(document.querySelector('[name="paho_diabetes"]').value);
+
+            let age_idx = -1;
+            if (age >= 40 && age <= 49) age_idx = 0; else if (age >= 50 && age <= 59) age_idx = 1; else if (age >= 60 && age <= 69) age_idx = 2; else if (age >= 70) age_idx = 3;
+            
+            let sbp_idx = -1;
+            if (sbp < 140) sbp_idx = 0; else if (sbp <= 159) sbp_idx = 1; else if (sbp <= 179) sbp_idx = 2; else if (sbp >= 180) sbp_idx = 3;
+
+            let risk_group_idx = (gender === 'Femenino' ? 4 : 0) + (smoker * 1) + (diabetes * 2);
+
+            let risk = -1, text = "N/A", riskClass = "bajo";
+            if (age_idx > -1 && sbp_idx > -1) {
+                risk = R[risk_group_idx][age_idx][sbp_idx] * 100;
+                if (risk < 10) { text = `<10% (Bajo)`; riskClass = 'bajo'; } 
+                else if (risk < 20) { text = `10% a <20% (Medio)`; riskClass = 'medio'; } 
+                else if (risk < 30) { text = `20% a <30% (Alto)`; riskClass = 'alto'; } 
+                else if (risk < 40) { text = `30% a <40% (Muy Alto)`; riskClass = 'muy-alto'; }
+                else { text = `≥40% (Crítico)`; riskClass = 'critico'; }
+            }
+
+            if (updateDOM) {
+                const riskEl = document.getElementById('paho-risk-result');
+                riskEl.innerHTML = text;
+                riskEl.className = `risk-badge ${riskClass}`;
+            }
+            return { risk, text, riskClass };
+        }
+        
+        // --- Dynamic UI Functions ---
+
+        function addDx() {
+            const item = document.createElement('div');
+            item.className = 'dx-item';
+            item.innerHTML = `
+                <div class="form-group">
+                    <label>Descripción del Diagnóstico</label>
+                    <input type="text" class="dx-description" placeholder="Buscar por nombre o código CIE-10...">
+                </div>
+                <div class="form-group">
+                    <label>CIE-10</label>
+                    <input type="text" class="dx-cie10" readonly>
+                </div>
+                <button type="button" class="remove-dx-btn icon-button">&times;</button>
+            `;
+            dxContainer.appendChild(item);
+        }
+
+        function renderDx(dxList = []) {
+            dxContainer.innerHTML = '';
+            if (dxList.length === 0) { addDx(); return; }
+            dxList.forEach(dx => {
+                const item = document.createElement('div');
+                item.className = 'dx-item';
+                item.innerHTML = `
+                    <div class="form-group">
+                        <label>Descripción del Diagnóstico</label>
+                        <input type="text" class="dx-description" value="${dx.descripcion || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>CIE-10</label>
+                        <input type="text" class="dx-cie10" value="${dx.cie10 || ''}" readonly>
+                    </div>
+                    <button type="button" class="remove-dx-btn icon-button">&times;</button>
+                `;
+                dxContainer.appendChild(item);
+            });
+        }
+        
+        function toggleCapilarFields() {
+            const checkbox = document.getElementById('noSeRealizaCapilar');
+            const fields = document.getElementById('mediciones-capilares-fields');
+            fields.style.opacity = checkbox.checked ? '0.5' : '1';
+            fields.querySelectorAll('input').forEach(input => {
+                input.disabled = checkbox.checked;
+                if (checkbox.checked) input.value = '';
+            });
+        }
+        
+        function addEscala() {
+            const item = document.createElement('div'); item.className = 'escala-item';
+            item.innerHTML = `
+                <input type="text" class="escala-nombre" placeholder="Nombre (ej: RCV)">
+                <input type="text" class="escala-resultado" placeholder="Resultado">
+                <input type="text" class="escala-unidad" placeholder="Unidad (ej: %)">
+                <button type="button" class="remove-escala-btn icon-button">&times;</button>
+            `; document.getElementById('escalas-container').appendChild(item);
+        }
+        
+        function renderEscalas(escalas = []) {
+            const container = document.getElementById('escalas-container'); container.innerHTML = ''; if (!escalas) return;
+            escalas.forEach(e => { const item = document.createElement('div'); item.className = 'escala-item';
+                item.innerHTML = `
+                    <input type="text" class="escala-nombre" value="${e.nombre||''}">
+                    <input type="text" class="escala-resultado" value="${e.resultado||''}">
+                    <input type="text" class="escala-unidad" value="${e.unidad||''}">
+                    <button type="button" class="remove-escala-btn icon-button">&times;</button>
+                `; container.appendChild(item);
+            });
+        }
+
+        function updatePahoInputs() {
+            document.querySelector('[name="paho_genero"]').value = document.getElementById('genero').value || 'Masculino';
+            document.querySelector('[name="paho_edad"]').value = document.getElementById('edad').value;
+            document.querySelector('[name="paho_pas"]').value = document.getElementById('pas').value;
+        }
+
+        function applyInitialTheme() {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        function toggleTheme() {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+        
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            sidebarToggleBtn.addEventListener('click', () => {
+                appContainer.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('sidebarCollapsed', appContainer.classList.contains('sidebar-collapsed'));
+            });
+
+            searchInput.addEventListener('input', () => renderPatientList(searchInput.value));
+            patientListEl.addEventListener('click', e => { const li = e.target.closest('li'); if (li && li.dataset.id) { populateForm(li.dataset.id); }});
+            newPatientBtn.addEventListener('click', clearForm);
+            savePatientBtn.addEventListener('click', handleSave);
+            deletePatientBtn.addEventListener('click', handleDelete);
+            duplicatePatientBtn.addEventListener('click', handleDuplicate);
+            printBtn.addEventListener('click', () => exporter.printRecord(collectFormData()));
+            exportJsonBtn.addEventListener('click', () => exporter.exportAsJSON(collectFormData()));
+            exportJsBtn.addEventListener('click', () => exporter.exportAsJS(collectFormData()));
+            themeToggleBtn.addEventListener('click', toggleTheme);
+            selectFolderBtn.addEventListener('click', selectDirectory);
+            templateBtn.addEventListener('click', openTemplateModal);
+            closeModalBtn.addEventListener('click', closeTemplateModal);
+            templateModal.addEventListener('click', (e) => { if (e.target === templateModal) closeTemplateModal(); });
+            
+            templateCategoriesEl.addEventListener('click', e => { if (e.target.tagName === 'LI') { document.querySelectorAll('#template-categories li').forEach(li => li.classList.remove('active')); e.target.classList.add('active'); displayTemplatesForCategory(e.target.dataset.category); } });
+            templateListEl.addEventListener('click', e => { if (e.target.tagName === 'LI') { document.getElementById('enfermedadActual').value = processTemplate(e.target.dataset.text); closeTemplateModal(); } });
+
+            form.addEventListener('input', e => {
+                clearTimeout(state.autosaveTimeout);
+                if (state.currentPatientId) { state.autosaveTimeout = setTimeout(handleSave, 1500); }
+                if (['pas', 'pad'].includes(e.target.id)) calculatePAM();
+                if (['peso', 'talla'].includes(e.target.id)) calculateIMC();
+                if (['genero', 'edad', 'pas'].includes(e.target.id)) { updatePahoInputs(); calculatePahoRisk(); }
+                if (e.target.id === 'noSeRealizaCapilar') toggleCapilarFields();
+                if(e.target.checkValidity()) e.target.classList.remove('invalid');
+            });
+            
+            document.getElementById('add-dx-btn').addEventListener('click', addDx);
+            dxContainer.addEventListener('click', e => { if (e.target.classList.contains('remove-dx-btn')) e.target.closest('.dx-item').remove(); });
+            dxContainer.addEventListener('input', e => { if (e.target.classList.contains('dx-description')) handleDxSearch(e.target); });
+            dxContainer.addEventListener('focusout', () => setTimeout(closeAutocomplete, 150));
+            
+            findriscForm.addEventListener('input', () => calculateFindrisc());
+            pahoRiskForm.addEventListener('input', () => calculatePahoRisk());
+
+            document.getElementById('add-escala-btn').addEventListener('click', addEscala);
+            document.getElementById('escalas-container').addEventListener('click', e => { if (e.target.classList.contains('remove-escala-btn')) e.target.closest('.escala-item').remove(); });
+        }
+        init();
+    });
+    </script>
+</body>
+</html>
+
