@@ -277,6 +277,15 @@
             gap: 0.25rem;
             position: relative;
         }
+        
+        .reference-range {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            display: block;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
 
         .form-group.with-unit {
             position: relative;
@@ -286,10 +295,10 @@
             padding-right: 45px;
         }
 
-        .form-group.with-unit span {
+        .form-group.with-unit .unit-label {
             position: absolute;
             right: 10px;
-            top: 55%;
+            top: 36px;
             color: var(--color-text-secondary);
             font-size: 0.875rem;
         }
@@ -333,10 +342,22 @@
           resize: vertical;
         }
 
-        .checkbox-group {
+        .checkbox-group, .radio-group {
+            display: flex;
             flex-direction: row;
             align-items: center;
             gap: 0.5rem;
+        }
+        .checkbox-group label, .radio-group label {
+            color: var(--color-text-primary);
+            font-weight: 400;
+            font-size: 0.9rem;
+        }
+        
+        #edad-calculada {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
         }
 
         /* --- Botones --- */
@@ -520,22 +541,38 @@
         #imc-category.sobrepeso { background-color: #f5a623; }
         #imc-category.obesidad { background-color: var(--color-danger); }
 
-        /* --- Escalas Dinámicas --- */
-        .escala-item {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr auto;
-            gap: 0.5rem;
-            align-items: flex-end;
-            margin-bottom: 0.5rem;
-        }
 
         /* --- Diagnóstico --- */
-        .dx-item {
-            display: grid;
-            grid-template-columns: 1fr 120px auto;
+        #diagnosticos-chips {
+            display: flex;
+            flex-wrap: wrap;
             gap: 0.5rem;
-            align-items: flex-end;
-            margin-bottom: 0.5rem;
+            margin-top: 0.5rem;
+            min-height: 24px;
+        }
+        .dx-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--color-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+        }
+        .dx-chip small {
+            opacity: 0.8;
+        }
+        .dx-chip button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        .dx-chip button:hover {
+            opacity: 1;
         }
         .autocomplete-results {
             position: absolute;
@@ -667,6 +704,70 @@
             margin-bottom: 0.5rem;
             border: 1px solid var(--color-border);
         }
+        
+        /* --- Estilos para Modo Simplificado --- */
+        body.simplified-mode #signos-vitales,
+        body.simplified-mode #datos-antropometricos,
+        body.simplified-mode #mediciones-capilares,
+        body.simplified-mode #revision-sistemas,
+        body.simplified-mode #notas-examenes,
+        body.simplified-mode #evolucion-recomendaciones,
+        body.simplified-mode #paho-risk-card,
+        body.simplified-mode #findrisc-card,
+        body.simplified-mode #tamizaje-violencia-card,
+        body.simplified-mode #tratamiento-no-farmacologico-card,
+        body.simplified-mode #recomendaciones-embarazada-card,
+        body.simplified-mode #recomendaciones-nino-card {
+            display: none;
+        }
+
+        /* --- Switch Toggle --- */
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 60px;
+          height: 34px;
+        }
+        .switch input { 
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          transition: .4s;
+          border-radius: 34px;
+        }
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 26px;
+          width: 26px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          transition: .4s;
+          border-radius: 50%;
+        }
+        input:checked + .slider {
+          background-color: var(--color-primary);
+        }
+        input:checked + .slider:before {
+          transform: translateX(26px);
+        }
+        .mode-toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
 
 
         /* -------------------- */
@@ -699,19 +800,31 @@
               overflow: visible;
           }
           .main-header {
-              flex-direction: row;
-              flex-wrap: wrap;
+              flex-direction: column; /* Cambiado a columna para móvil */
+              align-items: flex-start; /* Alinear a la izquierda */
               gap: 1rem;
           }
           .main-header-left {
             width: 100%;
+            justify-content: space-between; /* Espacio entre titulo/toggle y switch */
           }
+           .main-header-controls {
+               display: flex;
+               justify-content: space-between;
+               align-items: center;
+               width: 100%;
+           }
           .action-buttons {
-            width: 100%;
-            justify-content: flex-start;
+            width: auto; /* Ajustar ancho automáticamente */
+            justify-content: flex-end; /* Alinear botones a la derecha */
           }
           #sidebar-toggle {
             display: none;
+          }
+          .mode-toggle-label {
+              justify-content: flex-end;
+              width: 100%;
+              margin-top: -0.5rem;
           }
           .modal-body {
               grid-template-columns: 1fr;
@@ -731,9 +844,25 @@
             background-color: #fff;
             color: #000;
           }
-          .app-container, .sidebar, .main-header, form button, input[type="file"] {
+          .app-container, .sidebar, .main-header, form button, input[type="file"], .mode-toggle-label {
             display: none;
           }
+          /* Ocultar secciones no deseadas en modo simplificado al imprimir */
+          body.simplified-mode #signos-vitales,
+          body.simplified-mode #datos-antropometricos,
+          body.simplified-mode #mediciones-capilares,
+          body.simplified-mode #revision-sistemas,
+          body.simplified-mode #notas-examenes,
+          body.simplified-mode #evolucion-recomendaciones,
+          body.simplified-mode #paho-risk-card,
+          body.simplified-mode #findrisc-card,
+          body.simplified-mode #tamizaje-violencia-card,
+          body.simplified-mode #tratamiento-no-farmacologico-card,
+          body.simplified-mode #recomendaciones-embarazada-card,
+          body.simplified-mode #recomendaciones-nino-card {
+              display: none !important; /* Usar !important para asegurar que se oculten */
+          }
+
           .main-content {
               display: block;
               overflow: visible;
@@ -841,10 +970,20 @@
         <main class="main-content">
             <header class="main-header">
                 <div class="main-header-left">
-                    <button id="sidebar-toggle" class="icon-button" title="Ocultar/mostrar panel lateral">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-                    </button>
-                    <h2 id="form-title">Nuevo Registro</h2>
+                     <div class="main-header-controls">
+                        <button id="sidebar-toggle" class="icon-button" title="Ocultar/mostrar panel lateral">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                        </button>
+                        <h2 id="form-title">Nuevo Registro</h2>
+                     </div>
+                     <div class="mode-toggle-label">
+                        Simplificado
+                        <label class="switch">
+                          <input type="checkbox" id="mode-toggle">
+                          <span class="slider"></span>
+                        </label>
+                        Avanzado
+                    </div>
                 </div>
                 <div class="action-buttons">
                     <button id="save-patient-btn" class="button success">Guardar</button>
@@ -863,32 +1002,78 @@
             
             <form id="patient-form" class="patient-form-grid">
                 <input type="hidden" id="patient-id">
+
+                <section class="card" id="clasificacion-atencion">
+                    <div class="card-title">
+                        <span>1. Clasificación de la Atención</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="tipoAtencion">Tipo de Atención</label>
+                                <select id="tipoAtencion" name="tipoAtencion">
+                                    <option value="Intramural">Intramural</option>
+                                    <option value="Extramural">Extramural</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="lugarAtencion">Lugar de Atención</label>
+                                <select id="lugarAtencion" name="lugarAtencion"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="grupoPrioritario">Grupo Prioritario</label>
+                                <select id="grupoPrioritario" name="grupoPrioritario">
+                                    <option value="NO APLICA">NO APLICA</option>
+                                    <option value="Personas Por Desastres Naturales">Personas Por Desastres Naturales</option>
+                                    <option value="Personas Por Desastres Antropogénicos">Personas Por Desastres Antropogénicos</option>
+                                    <option value="Privadas De La Libertad">Privadas De La Libertad</option>
+                                    <option value="Víctimas De Violencia Física">Víctimas De Violencia Física</option>
+                                    <option value="Víctimas De Violencia Psicológica">Víctimas De Violencia Psicológica</option>
+                                    <option value="Víctimas De Violencia Sexual">Víctimas De Violencia Sexual</option>
+                                    <option value="Trabajador/A Sexual">Trabajador/A Sexual</option>
+                                    <option value="Enfermedades Catastróficas y Raras">Enfermedades Catastróficas y Raras</option>
+                                    <option value="Persona en cuidados paliativos">Persona en cuidados paliativos</option>
+                                    <option value="Persona en cuidados a largo plazo">Persona en cuidados a largo plazo</option>
+                                    <option value="Persona en cuidados permanentes">Persona en cuidados permanentes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </section>
                 
                 <section class="card" id="datos-paciente">
                     <div class="card-title">
-                        <span>1. Datos del Paciente</span>
+                        <span>2. Datos del Paciente</span>
                     </div>
                     <div class="card-content">
                         <div class="form-grid">
                             <div class="form-group"><label for="nombre">Nombre Completo</label><input type="text" id="nombre" name="nombre" required></div>
                             <div class="form-group"><label for="cedula">Cédula</label><input type="text" id="cedula" name="cedula" required pattern="\d{10}" title="Debe contener 10 dígitos"></div>
-                            <div class="form-group"><label for="edad">Edad</label><input type="number" id="edad" name="edad" min="0" max="120"></div>
+                            <div class="form-group">
+                                <label for="edad" id="edad-label">Edad (años)</label>
+                                <input type="number" id="edad" name="edad" min="0" max="120">
+                                <div class="checkbox-group" id="edad-meses-group">
+                                    <input type="checkbox" id="edad-en-meses">
+                                    <label for="edad-en-meses">Es menor de 3 años (usar meses)</label>
+                                </div>
+                                <span id="edad-calculada" class="reference-range"></span>
+                            </div>
                             <div class="form-group"><label for="genero">Género</label><select id="genero" name="genero"><option value="">Seleccionar...</option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option><option value="Otro">Otro</option></select></div>
                         </div>
                     </div>
                 </section>
                 
-                <section class="card">
+                <section class="card" id="motivo-consulta">
                     <div class="card-title">
-                        <span>2. Motivo de Consulta</span>
+                        <span>3. Motivo de Consulta</span>
                     </div>
                     <div class="card-content"><div class="form-group"><textarea id="motivoConsulta" name="motivoConsulta" rows="3"></textarea></div></div>
                 </section>
 
-                <section class="card">
+                <section class="card" id="enfermedad-actual">
                     <div class="card-title">
                         <div class="card-title-content">
-                            <span>3. Enfermedad Actual</span>
+                            <span>4. Enfermedad Actual</span>
                             <button type="button" id="template-btn" class="icon-button" title="Usar plantilla">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                             </button>
@@ -897,94 +1082,272 @@
                     <div class="card-content"><div class="form-group"><textarea id="enfermedadActual" name="enfermedadActual" rows="6"></textarea></div></div>
                 </section>
 
-                <section class="card">
+                <section class="card" id="signos-vitales">
                     <div class="card-title">
-                        <span>4. Signos Vitales</span>
+                        <span>5. Signos Vitales</span>
                     </div>
                     <div class="card-content">
                         <div class="form-grid-vitals">
-                            <div class="form-group with-unit"><label for="pas">PAS</label><input type="number" id="pas" name="pas" min="50" max="260"><span>mmHg</span></div>
-                            <div class="form-group with-unit"><label for="pad">PAD</label><input type="number" id="pad" name="pad" min="30" max="160"><span>mmHg</span></div>
-                            <div class="form-group with-unit tooltip"><label for="pam">PAM</label><input type="number" id="pam" name="pam"><span>mmHg</span><span class="tooltip-text">Se calcula automáticamente. Editable.</span></div>
-                            <div class="form-group with-unit"><label for="fc">FC</label><input type="number" id="fc" name="fc" min="30" max="220"><span>lat/min</span></div>
-                            <div class="form-group with-unit"><label for="fr">FR</label><input type="number" id="fr" name="fr" min="6" max="60"><span>resp/min</span></div>
-                            <div class="form-group with-unit"><label for="temperatura">Temp</label><input type="number" id="temperatura" name="temperatura" step="0.1" min="34" max="42"><span>°C</span></div>
-                            <div class="form-group with-unit"><label for="spo2">SpO₂</label><input type="number" id="spo2" name="spo2" min="50" max="100"><span>%</span></div>
+                            <div class="form-group with-unit" id="pas-group"><label for="pas">PAS</label><input type="number" id="pas" name="pas" min="50" max="260"><span class="unit-label">mmHg</span><span class="reference-range" id="pas-range"></span></div>
+                            <div class="form-group with-unit" id="pad-group"><label for="pad">PAD</label><input type="number" id="pad" name="pad" min="30" max="160"><span class="unit-label">mmHg</span><span class="reference-range" id="pad-range"></span></div>
+                            <div class="form-group with-unit tooltip" id="pam-group"><label for="pam">PAM</label><input type="number" id="pam" name="pam"><span class="unit-label">mmHg</span><span class="tooltip-text">Se calcula automáticamente.</span></div>
+                            <div class="form-group with-unit"><label for="fc">FC</label><input type="number" id="fc" name="fc" min="30" max="220"><span class="unit-label">lat/min</span><span class="reference-range" id="fc-range"></span></div>
+                            <div class="form-group with-unit"><label for="fr">FR</label><input type="number" id="fr" name="fr" min="6" max="60"><span class="unit-label">resp/min</span><span class="reference-range" id="fr-range"></span></div>
+                            <div class="form-group with-unit"><label for="temperatura">Temp</label><input type="number" id="temperatura" name="temperatura" step="0.1" min="34" max="42"><span class="unit-label">°C</span></div>
+                            <div class="form-group with-unit"><label for="spo2">SpO₂</label><input type="number" id="spo2" name="spo2" min="50" max="100"><span class="unit-label">%</span></div>
                         </div>
                     </div>
                 </section>
                 
-                <section class="card">
+                <section class="card" id="datos-antropometricos">
                     <div class="card-title">
-                        <span>5. Datos Antropométricos</span>
+                        <span>6. Datos Antropométricos</span>
                     </div>
                     <div class="card-content">
                         <div class="form-grid-vitals">
-                             <div class="form-group with-unit"><label for="peso">Peso</label><input type="number" id="peso" name="peso" step="0.1" required><span>kg</span></div>
-                            <div class="form-group with-unit"><label for="talla">Talla</label><input type="number" id="talla" name="talla_cm" required><span>cm</span></div>
+                             <div class="form-group with-unit"><label for="peso">Peso</label><input type="number" id="peso" name="peso" step="0.1" required><span class="unit-label">kg</span></div>
+                            <div class="form-group with-unit"><label for="talla">Talla</label><input type="number" id="talla" name="talla_cm" required><span class="unit-label">cm</span></div>
                             <div class="form-group with-unit tooltip"><label for="imc">IMC</label><input type="number" id="imc" name="imc" step="0.1" readonly><span id="imc-category"></span><span class="tooltip-text">Se calcula automáticamente.</span></div>
-                            <div class="form-group with-unit"><label for="perimetroAbdominal">P. Abdominal</label><input type="number" id="perimetroAbdominal" name="perimetroAbdominal"><span>cm</span></div>
+                            <div class="form-group with-unit"><label for="perimetroAbdominal">P. Abdominal</label><input type="number" id="perimetroAbdominal" name="perimetroAbdominal"><span class="unit-label">cm</span></div>
                         </div>
                     </div>
                 </section>
 
-                <section class="card">
+                <section class="card" id="mediciones-capilares">
                     <div class="card-title">
-                        <span>6. Mediciones Capilares</span>
+                        <span>7. Mediciones Capilares</span>
                     </div>
                     <div class="card-content">
                         <div class="form-group checkbox-group"><input type="checkbox" id="noSeRealizaCapilar" name="noSeRealiza"><label for="noSeRealizaCapilar">No se realiza</label></div>
                         <div class="form-grid-vitals" id="mediciones-capilares-fields">
-                             <div class="form-group with-unit"><label for="glucosa">Glucosa</label><input type="number" id="glucosa" name="glucosa" min="20" max="600"><span>mg/dL</span></div>
-                            <div class="form-group with-unit"><label for="hemoglobina">Hemoglobina</label><input type="number" id="hemoglobina" name="hemoglobina" step="0.1" min="3" max="22"><span>g/dL</span></div>
-                             <div class="form-group with-unit"><label for="hemoglobinaCorregida">Hb Corregida</label><input type="number" id="hemoglobinaCorregida" name="hemoglobinaCorregida" step="0.1"><span>g/dL</span></div>
+                             <div class="form-group with-unit"><label for="glucosa">Glucosa</label><input type="number" id="glucosa" name="glucosa" min="20" max="600"><span class="unit-label">mg/dL</span></div>
+                            <div class="form-group with-unit"><label for="hemoglobina">Hemoglobina</label><input type="number" id="hemoglobina" name="hemoglobina" step="0.1" min="3" max="22"><span class="unit-label">g/dL</span></div>
+                             <div class="form-group with-unit"><label for="hemoglobinaCorregida">Hb Corregida</label><input type="number" id="hemoglobinaCorregida" name="hemoglobinaCorregida" step="0.1"><span class="unit-label">g/dL</span></div>
                         </div>
                     </div>
                 </section>
                 
-                <section class="card"><div class="card-title"><span>7. Revisión por Sistemas</span></div><div class="card-content"><div class="form-group"><textarea id="revisionSistemas" name="revisionSistemas" rows="6"></textarea></div></div></section>
-                <section class="card"><div class="card-title"><span>8. Examen Físico</span></div><div class="card-content"><div class="form-group"><textarea id="examenFisico" name="examenFisico" rows="6"></textarea></div></div></section>
+                <section class="card" id="revision-sistemas">
+                    <div class="card-title">
+                        <span>8. Revisión por Sistemas</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="noSeRealizaSistemas" name="noSeRealizaSistemas">
+                            <label for="noSeRealizaSistemas">No se realiza</label>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="revisionSistemas" name="revisionSistemas" rows="6"></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card" id="examen-fisico">
+                    <div class="card-title">
+                         <div class="card-title-content">
+                            <span>9. Examen Físico</span>
+                            <button type="button" id="template-btn-pe" class="icon-button" title="Usar plantilla">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content"><div class="form-group"><textarea id="examenFisico" name="examenFisico" rows="6"></textarea></div></div>
+                </section>
                 
-                <section class="card">
+                <section class="card" id="notas-examenes">
                     <div class="card-title">
-                        <span>9. Notas de Exámenes</span>
+                        <span>10. Notas de Exámenes</span>
                     </div>
                     <div class="card-content">
-                        <div class="form-group"><label for="examenesNotas">Notas</label><textarea id="examenesNotas" name="examenesNotas" rows="4"></textarea></div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="noSeRealizaExamenes" name="noSeRealizaExamenes">
+                            <label for="noSeRealizaExamenes">No se realiza</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="examenesNotas">Notas de Laboratorio / Imagen</label>
+                            <textarea id="examenesNotas" name="examenesNotas" rows="4"></textarea>
+                        </div>
                     </div>
                 </section>
 
-                <section class="card">
+                <section class="card" id="diagnostico">
                     <div class="card-title">
-                        <span>10. Diagnóstico (CIE-10)</span>
+                        <span>11. Diagnóstico (CIE-10)</span>
                     </div>
                     <div class="card-content">
-                         <div id="diagnosticos-container"></div>
-                         <button type="button" id="add-dx-btn" class="button mt-1">Agregar Diagnóstico</button>
-                         <hr style="margin: 1rem 0;">
-                         <div class="form-group"><label for="dxDiferenciales">Otros Diagnósticos Diferenciales</label><input type="text" id="dxDiferenciales" name="dxDiferenciales"></div>
+                        <div class="form-group">
+                            <label for="dx-search-input">Buscar y Agregar Diagnóstico</label>
+                            <input type="text" id="dx-search-input" placeholder="Buscar por nombre o código CIE-10...">
+                        </div>
+                        <div id="diagnosticos-chips"></div>
+                        <hr style="margin: 1rem 0;">
+                        <div class="form-group"><label for="dxDiferenciales">Otros Diagnósticos Diferenciales</label><input type="text" id="dxDiferenciales" name="dxDiferenciales"></div>
                     </div>
                 </section>
 
-                <section class="card"><div class="card-title"><span>11. Tratamiento</span></div><div class="card-content"><div class="form-group"><textarea id="tratamiento" name="tratamiento" rows="6"></textarea></div></div></section>
-                <section class="card"><div class="card-title"><span>12. Recomendaciones</span></div><div class="card-content"><div class="form-group"><textarea id="recomendaciones" name="recomendaciones" rows="4"></textarea></div></div></section>
-
-                <section class="card">
+                <section class="card" id="tratamiento">
+                    <div class="card-title"><span>12. Tratamiento Farmacológico</span></div>
+                    <div class="card-content"><div class="form-group"><textarea id="tratamiento" name="tratamiento" rows="6"></textarea></div></div>
+                </section>
+                
+                <section class="card" id="tratamiento-no-farmacologico-card">
                     <div class="card-title">
-                        <span>13. Escalas / Test Personalizados</span>
+                        <span>13. Tratamiento no Farmacológico (Recomendaciones)</span>
                     </div>
                     <div class="card-content">
-                        <div id="escalas-container"></div>
-                        <button type="button" id="add-escala-btn" class="button">Agregar Escala</button>
+                        <div class="form-grid">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tnf-alimentacion" name="tnf_alimentacion" value="ALIMENTACIÓN">
+                                <label for="tnf-alimentacion">ALIMENTACIÓN</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tnf-actividad" name="tnf_actividad" value="ACTIVIDAD FÍSICA FORTALECIMIENTO MUSCULAR">
+                                <label for="tnf-actividad">ACTIVIDAD FÍSICA FORTALECIMIENTO MUSCULAR</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tnf-higiene" name="tnf_higiene" value="HIGIENE CORPORAL">
+                                <label for="tnf-higiene">HIGIENE CORPORAL</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tnf-its" name="tnf_its" value="PREVENCIÓN DE INFECCIONES DE TRANSMISIÓN SEXUAL">
+                                <label for="tnf-its">PREVENCIÓN DE INFECCIONES DE TRANSMISIÓN SEXUAL</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tnf-mental" name="tnf_mental" value="SALUD MENTAL">
+                                <label for="tnf-mental">SALUD MENTAL</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tnf-oral" name="tnf_oral" value="SALUD ORAL">
+                                <label for="tnf-oral">SALUD ORAL</label>
+                            </div>
+                             <div class="checkbox-group">
+                                <input type="checkbox" id="tnf-sexual" name="tnf_sexual" value="SALUD SEXUAL Y SALUD REPRODUCTIVA">
+                                <label for="tnf-sexual">SALUD SEXUAL Y SALUD REPRODUCTIVA</label>
+                            </div>
+                             <div class="checkbox-group">
+                                <input type="checkbox" id="tnf-planificacion" name="tnf_planificacion" value="PLANIFICACIÓN FAMILIAR">
+                                <label for="tnf-planificacion">PLANIFICACIÓN FAMILIAR</label>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
-                 <section class="card">
+                <section class="card hidden" id="recomendaciones-nino-card">
                     <div class="card-title">
-                        <span>14. Riesgo Cardiovascular (PAHO/OMS Ecuador)</span>
+                        <span>Recomendaciones (Niño &lt; 5 años)</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-grid" id="rec-nino-menor-24">
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_nino_1" value="NIÑAS Y NIÑOS DE 6 A 24 MESES - HIGIENE CORPORAL - BAÑARSE DIARIAMENTE">
+                                <label>NIÑAS Y NIÑOS DE 6 A 24 MESES - HIGIENE CORPORAL - BAÑARSE DIARIAMENTE</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_nino_2" value="NIÑAS Y NIÑOS DE 6 A 24 MESES - LACTANCIA MATERNA Y ALIMENTACIÓN COMPLEMENTARIA - LACTANCIA MATERNA CONTINÚA ACOMPAÑADA DE ALIMENTACIÓN COMPLEMENTARIA A PARTIR DE LOS 6 MESES HASTA LOS 24 DE MESES O MÁS">
+                                <label>NIÑAS Y NIÑOS DE 6 A 24 MESES - LACTANCIA MATERNA Y ALIMENTACIÓN COMPLEMENTARIA...</label>
+                            </div>
+                        </div>
+                        <div class="form-grid" id="rec-nino-24-59">
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_nino_3" value="NIÑAS Y NIÑOS DE 24 A 59 MESES - ALIMENTACIÓN - LA NIÑA O NIÑO DEBE RECIBIR TRES COMIDAS PRINCIPALES: DESAYUNO, ALMUERZO Y MERIENDA, Y DOS REFRIGERIOS NUTRITIVOS, ENTRE LAS COMIDAS">
+                                <label>NIÑAS Y NIÑOS DE 24 A 59 MESES - ALIMENTACIÓN - TRES COMIDAS PRINCIPALES Y DOS REFRIGERIOS</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_nino_4" value="NIÑAS Y NIÑOS DE 24 A 59 MESES - ACTIVIDAD FÍSICA FORTALECIMIENTO MUSCULAR - REALICE AL MENOS 60 O MÁS MIN DIARIOS DE ACTIVIDAD FÍSICA MODERADA (PASEAR CON LA MASCOTA, BAILAR, ENTRE OTROS) A VIGOROSA (JUEGOS, SALTAR LA CUERDA, ENTRE OTROS)">
+                                <label>NIÑAS Y NIÑOS DE 24 A 59 MESES - ACTIVIDAD FÍSICA - AL MENOS 60 MIN DIARIOS</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_nino_5" value="NIÑAS Y NIÑOS DE 24 A 59 MESES - ACTIVIDAD FÍSICA FORTALECIMIENTO MUSCULAR - LIMITE EL TIEMPO DE USO DE PANTALLAS">
+                                <label>NIÑAS Y NIÑOS DE 24 A 59 MESES - ACTIVIDAD FÍSICA - LIMITE EL TIEMPO DE USO DE PANTALLAS</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_nino_6" value="NIÑAS Y NIÑOS DE 24 A 59 MESES - SALUD MENTAL - MANTENER UN HÁBITO DE SUEÑO DE 10 A 12 HORAS DIARIAS">
+                                <label>NIÑAS Y NIÑOS DE 24 A 59 MESES - SALUD MENTAL - HÁBITO DE SUEÑO DE 10 A 12 HORAS DIARIAS</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_nino_7" value="NIÑAS Y NIÑOS DE 24 A 59 MESES - HIGIENE CORPORAL - CEPILLADO DENTAL CON LA ASISTENCIA DE LOS PADRES O CUIDADORES">
+                                <label>NIÑAS Y NIÑOS DE 24 A 59 MESES - HIGIENE CORPORAL - CEPILLADO DENTAL CON ASISTENCIA</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_nino_8" value="NIÑAS Y NIÑOS DE 24 A 59 MESES - HIGIENE CORPORAL - BAÑARSE DIARIAMENTE">
+                                <label>NIÑAS Y NIÑOS DE 24 A 59 MESES - HIGIENE CORPORAL - BAÑARSE DIARIAMENTE</label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card hidden" id="recomendaciones-embarazada-card">
+                    <div class="card-title">
+                        <span>15. Recomendaciones (Gestante)</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-grid">
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_emb_1" value="GESTANTE - PRENATAL Y PARTO - CAMBIOS FISIOLÓGICOS DEL EMBARAZO">
+                                <label>GESTANTE - PRENATAL Y PARTO - CAMBIOS FISIOLÓGICOS DEL EMBARAZO</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_emb_2" value="GESTANTE - PRENATAL Y PARTO - ASESORÍAS SIGNO DE ALARMA DURANTE EL EMBARAZO PARTO Y POSTPARTO">
+                                <label>GESTANTE - PRENATAL Y PARTO - ASESORÍAS SIGNO DE ALARMA DURANTE EL EMBARAZO PARTO Y POSTPARTO</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_emb_3" value="GESTANTE - PRENATAL Y PARTO - ASISTE A TALLERES DE EDUCACIÓN PRENATAL">
+                                <label>GESTANTE - PRENATAL Y PARTO - ASISTE A TALLERES DE EDUCACIÓN PRENATAL</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="rec-emb-obligatoria" name="rec_emb_4" value="GESTANTE - ALIMENTACIÓN - ALIMENTACIÓN VARIADA Y EQUILIBRADA, PARA UNA ADECUADA GANANCIA DE PESO Y ADECUADO DESARROLLO DEL NIÑO O NIÑA">
+                                <label>GESTANTE - ALIMENTACIÓN - ALIMENTACIÓN VARIADA Y EQUILIBRADA, PARA UNA ADECUADA GANANCIA DE PESO Y ADECUADO DESARROLLO DEL NIÑO O NIÑA</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_emb_5" value="GESTANTE - HIGIENE CORPORAL - BAÑARSE DIARIAMENTE">
+                                <label>GESTANTE - HIGIENE CORPORAL - BAÑARSE DIARIAMENTE</label>
+                            </div>
+                             <div class="checkbox-group">
+                                <input type="checkbox" name="rec_emb_6" value="GESTANTE - ACTIVIDAD FÍSICA FORTALECIMIENTO MUSCULAR - REALICE 10 MIN DIARIOS DE ACTIVIDAD FÍSICA MODERADA (CAMINAR)">
+                                <label>GESTANTE - ACTIVIDAD FÍSICA - REALICE 10 MIN DIARIOS DE ACTIVIDAD FÍSICA MODERADA (CAMINAR)</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_emb_7" value="GESTANTE - ACTIVIDAD FÍSICA FORTALECIMIENTO MUSCULAR - REALICE AL MENOS 30 O MÁS MIN DIARIOS DE ACTIVIDAD FÍSICA">
+                                <label>GESTANTE - ACTIVIDAD FÍSICA - REALICE AL MENOS 30 O MÁS MIN DIARIOS DE ACTIVIDAD FÍSICA</label>
+                            </div>
+                             <div class="checkbox-group">
+                                <input type="checkbox" name="rec_emb_8" value="GESTANTE - SALUD MENTAL - ELIMINE EL CONSUMO DE TABACO - TABACO ELECTRÓNICO, BEBIDAS ALCOHÓLICAS (INCLUIDA CERVEZA)">
+                                <label>GESTANTE - SALUD MENTAL - ELIMINE EL CONSUMO DE TABACO, BEBIDAS ALCOHÓLICAS</label>
+                            </div>
+                             <div class="checkbox-group">
+                                <input type="checkbox" name="rec_emb_9" value="GESTANTE - SALUD MENTAL - SI PRESENTA PENSAMIENTOS DE SUICIDIO, QUERER HACERSE DAÑO O HACER DAÑO AL BEBÉ, MANIFESTARLOS AL PERSONAL DE SALUD DE MANERA INMEDIATA">
+                                <label>GESTANTE - SALUD MENTAL - MANIFESTAR PENSAMIENTOS DE SUICIDIO O DAÑO AL BEBÉ</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="rec_emb_10" value="GESTANTE - PREVENCIÓN DE INFECCIONES DE TRANSMISIÓN SEXUAL - USE DOBLE PROTECCIÓN">
+                                <label>GESTANTE - PREVENCIÓN DE INFECCIONES DE TRANSMISIÓN SEXUAL - USE DOBLE PROTECCIÓN</label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="card" id="evolucion-recomendaciones">
+                    <div class="card-title">
+                        <div class="card-title-content">
+                            <span>16. Evolución (Texto Libre)</span>
+                            <button type="button" id="template-btn-evolucion" class="icon-button" title="Usar plantilla de recomendaciones">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content"><div class="form-group"><textarea id="evolucion" name="evolucion" rows="6"></textarea></div></div>
+                </section>
+                
+                <section class="card" id="paho-risk-card">
+                    <div class="card-title">
+                        <span>17. Riesgo Cardiovascular (PAHO/OMS Ecuador)</span>
                     </div>
                     <div class="card-content" id="paho-risk-form">
-                        <p class="text-sm text-center mb-2">Calculadora de riesgo a 10 años para la región de las Américas B (incluye Ecuador), sin datos de laboratorio.</p>
+                        <p class="text-sm text-center mb-2">Calculadora de riesgo a 10 años para la región de las Américas B (Ecuador).</p>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="paho_use_cholesterol" name="paho_use_cholesterol" class="paho-risk-input">
+                            <label for="paho_use_cholesterol">Calcular con Colesterol</label>
+                        </div>
                         <div class="paho-risk-grid">
                             <div class="form-group">
                                 <label>Género</label>
@@ -1012,6 +1375,10 @@
                                     <option value="1">Sí</option>
                                 </select>
                             </div>
+                            <div class="form-group with-unit hidden" id="paho-cholesterol-group">
+                                <label>Colesterol Total</label>
+                                <input type="number" name="paho_colesterol" class="paho-risk-input"><span class="unit-label">mg/dL</span>
+                            </div>
                         </div>
                         <div class="result-box">
                             <strong>Riesgo Cardiovascular a 10 años:</strong>
@@ -1020,9 +1387,9 @@
                     </div>
                 </section>
 
-                <section class="card">
+                <section class="card" id="findrisc-card">
                     <div class="card-title">
-                        <span>15. FINDRISC - Test de Riesgo de Diabetes</span>
+                        <span>18. FINDRISC - Test de Riesgo de Diabetes</span>
                     </div>
                     <div class="card-content" id="findrisc-form">
                         <div class="findrisc-grid">
@@ -1094,6 +1461,25 @@
                         </div>
                     </div>
                 </section>
+                
+                <section class="card" id="tamizaje-violencia-card">
+                    <div class="card-title">
+                        <span>19. Tamizaje de Violencia</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label>Resultado del Tamizaje</label>
+                            <select id="tamizajeViolencia" name="tamizajeViolencia">
+                                <option value="Negativo">Negativo</option>
+                                <option value="Positivo">Positivo</option>
+                            </select>
+                        </div>
+                        <div class="form-group hidden" id="tamizaje-detalles-group">
+                            <label for="tamizajeDetalles">Detalles</Glabel>
+                            <textarea id="tamizajeDetalles" name="tamizajeDetalles" rows="3"></textarea>
+                        </div>
+                    </div>
+                </section>
 
                 <div class="form-footer">
                     <span id="record-timestamps"></span>
@@ -1131,92 +1517,155 @@
         "PLANIFICACIÓN FAMILIAR": [
             {
                 title: "Inicio de Planificación",
-                text: "PACIENTE DE 21 AÑOS SIN APP, AGO G1 C1 A0 HV1 FP: 27 OCTUBRE. FUM: 28/01/2023, ACUDE A CONSULTA MÉDICA PARA INICIO DE MÉTODO DE PLANIFICACIÓN FAMILIAR. ASISTE CON PRUEBA BHCG CON RESULTADO NEGATIVO. SE DA ASESORÍA MÉDICA Y SE INDICA LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS QUE EXISTEN EN LA INSTITUCIÓN, SE EXPLICAN EFECTOS SECUNDARIOS DE LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS. SE ANALIZAN CRITERIOS DE ELEGIBILIDAD 1 Y SE ESCOGE MÉTODO DESEADO. HISTORIA DE USO MÉTODO ANTICONCEPTIVO: PRESERVATIVO MASCULINO. MENARQUIA 16 AÑOS. 1RA RELACIÓN SEXUAL: 19 AÑOS. PAREJAS SEXUALES: 1. RELACIÓN DE PAREJA: 1 AÑOS. PACIENTE ESTABLE Y COLABORADORA ACEPTA COLOCACIÓN DE METODO DE PLANIFICACION.\n\nEVOLUCIÓN: ESTABLE Y COLABORADORA, ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN POSTERIOR A ASESORÍA. BAJO NORMAS DE ASEPSIA Y ANTISEPSIA SE REALIZA CON ÉXITO LA COLOCACIÓN DE IMPLANTE SUBDÉRMICO. SE RECOMIENDA 24 HORAS DE REPOSO Y DE NO MANTENER RELACIONES SEXUALES. SE ENVIAN ANALGESICOS Y SE REALIZA CONSEJERIA EN SALUD SEXUAL Y REPRODUCTIVA, MÉTODOS DE PROTECCIÓN CONTRA ENFERMEDADES DE TRANSMISIÓN SEXUAL."
+                text: "PACIENTE DE 21 AÑOS SIN APP, AGO G1 C1 A0 HV1 FP: 27 OCTUBRE. FUM: 28/01/2023, ACUDE A CONSULTA MÉDICA PARA INICIO DE MÉTODO DE PLANIFICACIÓN FAMILIAR. ASISTE CON PRUEBA BHCG CON RESULTADO NEGATIVO. SE DA ASESORÍA MÉDICA Y SE INDICA LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS QUE EXISTEN EN LA INSTITUCIÓN, SE EXPLICAN EFECTOS SECUNDARIOS DE LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS. SE ANALIZAN CRITERIOS DE ELEGIBILIDAD 1 Y SE ESCOGE MÉTODO DESEADO. HISTORIA DE USO MÉTODO ANTICONCEPTIVO: PRESERVATIVO MASCULINO. MENARQUIA 16 AÑOS. 1RA RELACIÓN SEXUAL: 19 AÑOS. PAREJAS SEXUALES: 1. RELACIÓN DE PAREJA: 1 AÑOS. PACIENTE ESTABLE Y COLABORADORA ACEPTA COLOCACIÓN DE METODO DE PLANIFICACION.\n\nEVOLUCIÓN: ESTABLE Y COLABORADORA, ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN POSTERIOR A ASESORÍA. BAJO NORMAS DE ASEPSIA Y ANTISEPSIA SE REALIZA CON ÉXITO LA COLOCACIÓN DE IMPLANTE SUBDÉRMICO. SE RECOMIENDA 24 HORAS DE REPOSO Y DE NO MANTENER RELACIONES SEXUALES. SE ENVIAN ANALGESICOS Y SE REALIZA CONSEJERIA EN SALUD SEXUAL Y REPRODUCTIVA, MÉTODOS DE PROTECCIÓN CONTRA ENFERMEDADES DE TRANSMISIÓN SEXUAL.",
+                physicalExamText: ""
             },
             {
                 title: "Colocación Implante",
-                text: "PACIENTE FEMENINA, MESTIZA DE 22 AÑOS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. APF: RINITIS ALÉRGICA PADRE. APQ: NO REFIERE. NIEGA ALERGIA. AGO: G1 P1 C0 A0. ACUDE A CONSULTA MÉDICA PARA INICIO DE MÉTODO DE PLANIFICACIÓN FAMILIAR. ASISTE CON PRUEBA BHCG CON RESULTADO NEGATIVO. INDICA ENCUENTRA EN SU 2DO DIA DEL CICLO. SE DA ASESORÍA MÉDICA Y SE INDICA LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS QUE EXISTEN EN LA INSTITUCIÓN, SE EXPLICAN EFECTOS SECUNDARIOS DE LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS. SE ANALIZAN CRITERIOS DE ELEGIBILIDAD: 1 Y SE ESCOGE MÉTODO DESEADO. HISTORIA DE USO MÉTODO ANTICONCEPTIVO: PRESERVATIVO MASCULINO. MENARQUIA 16 AÑOS. 1RA RELACIÓN SEXUAL: 19 AÑOS. PAREJAS SEXUALES: 1. RELACIÓN DE  PAREJA: 1 AÑOS. PACIENTE ESTABLE Y COLABORADORA ACEPTA COLOCACIÓN DE METODO DE PLANIFICACION."
+                text: "PACIENTE FEMENINA, MESTIZA DE 22 AÑOS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. APF: RINITIS ALÉRGICA PADRE. APQ: NO REFIERE. NIEGA ALERGIA. AGO: G1 P1 C0 A0. ACUDE A CONSULTA MÉDICA PARA INICIO DE MÉTODO DE PLANIFICACIÓN FAMILIAR. ASISTE CON PRUEBA BHCG CON RESULTADO NEGATIVO. INDICA ENCUENTRA EN SU 2DO DIA DEL CICLO. SE DA ASESORÍA MÉDICA Y SE INDICA LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS QUE EXISTEN EN LA INSTITUCIÓN, SE EXPLICAN EFECTOS SECUNDARIOS DE LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS. SE ANALIZAN CRITERIOS DE ELEGIBILIDAD: 1 Y SE ESCOGE MÉTODO DESEADO. HISTORIA DE USO MÉTODO ANTICONCEPTIVO: PRESERVATIVO MASCULINO. MENARQUIA 16 AÑOS. 1RA RELACIÓN SEXUAL: 19 AÑOS. PAREJAS SEXUALES: 1. RELACIÓN DE  PAREJA: 1 AÑOS. PACIENTE ESTABLE Y COLABORADORA ACEPTA COLOCACIÓN DE METODO DE PLANIFICACION.",
+                physicalExamText: ""
             },
             {
                 title: "Retiro de Implante",
-                text: "PACIENTE FEMENINA, MESTIZA DE 17 AÑOS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS, NIEGA ANTECEDENTES QUIRÚRGICO. NO REFIERE ALERGIAS. ACUDE A CONSULTA PARA RETIRO DE IMPLANTE SUBDÉRMICO DE ETONOGESTREL 68MG COLOCADO 18-03-2020. ADEMÁS REFIERE QUERER INICIAR CON OTRO MÉTODO DE PLANIFICACIÓN. SE DA ASESORÍA Y SE ANALIZAN LOS CRITERIOS DE ELEGIBILIDAD CON RESULTADO: 1. PACIENTE CON MENARQUIA A LOS 15 AÑOS. INICIO DE VIDA SEXUAL 15. NÚMERO DE PAREJAS SEXUALES: NO REFIERE. HISTORIAL DE ANTICONCEPTIVOS: ETONOGESTREL 68 MG. PACIENTE NO REFIERE SINTOMATOLOGÍA. ÚLTIMA RELACIÓN SEXUAL HACE 6 DÍAS. PACIENTE TRANQUILA, ESTABLE Y COLABORADORA, ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN. ESTABLE Y COLABORADORA, ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN POSTERIOR A ASESORÍA. BAJO NORMAS DE ASEPSIA Y ANTISEPSIA SE REALIZA CON ÉXITO LA COLOCACIÓN DE IMPLANTE SUBDÉRMICO. SE RECOMIENDA 24 HORAS DE REPOSO Y DE NO MANTENER RELACIONES SEXUALES. SE ENVIAN ANALGESICOS Y SE REALIZA CONSEJERIA EN SALUD SEXUAL Y REPRODUCTIVA, MÉTODOS DE PROTECCIÓN CONTRA ENFERMEDADES DE TRANSMISIÓN SEXUAL."
+                text: "PACIENTE FEMENINA, MESTIZA DE 17 AÑOS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS, NIEGA ANTECEDENTES QUIRÚRGICO. NO REFIERE ALERGIAS. ACUDE A CONSULTA PARA RETIRO DE IMPLANTE SUBDÉRMICO DE ETONOGESTREL 68MG COLOCADO 18-03-2020. ADEMÁS REFIERE QUERER INICIAR CON OTRO MÉTODO DE PLANIFICACIÓN. SE DA ASESORÍA Y SE ANALIZAN LOS CRITERIOS DE ELEGIBILIDAD CON RESULTADO: 1. PACIENTE CON MENARQUIA A LOS 15 AÑOS. INICIO DE VIDA SEXUAL 15. NÚMERO DE PAREJAS SEXUALES: NO REFIERE. HISTORIAL DE ANTICONCEPTIVOS: ETONOGESTREL 68 MG. PACIENTE NO REFIERE SINTOMATOLOGÍA. ÚLTIMA RELACIÓN SEXUAL HACE 6 DÍAS. PACIENTE TRANQUILA, ESTABLE Y COLABORADORA, ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN. ESTABLE Y COLABORADORA, ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN POSTERIOR A ASESORÍA. BAJO NORMAS DE ASEPSIA Y ANTISEPSIA SE REALIZA CON ÉXITO LA COLOCACIÓN DE IMPLANTE SUBDÉRMICO. SE RECOMIENDA 24 HORAS DE REPOSO Y DE NO MANTENER RELACIONES SEXUALES. SE ENVIAN ANALGESICOS Y SE REALIZA CONSEJERIA EN SALUD SEXUAL Y REPRODUCTIVA, MÉTODOS DE PROTECCIÓN CONTRA ENFERMEDADES DE TRANSMISIÓN SEXUAL.",
+                physicalExamText: ""
             },
             {
                 title: "Supervisión de Implante",
-                text: "PACIENTE FEMENINA DE 17 AÑOS DE EDAD, MESTIZA, HETEROSEXUAL, G1 P1 HV1, FUP 07/10/2022, CON COLOCACION DE IMPLANTE SUBDERMICO DE 3 AÑOS HACE UN MES, ACUDE A CONSULTA PARA SUPERVISIÓN DE IMPLANTE. PACIENTE INDICA QUE DESDE COLOCACIÓN DEL MISMO, PRESENTA CEFALEA FRONTAL TIPO PULSÁTIL DE LEVE INTENSIDAD 4/10 CHE APARECE 2 VECES PER SEMANA Y DESAPARECE ESPONTÁNEAMENTE, INDICA CHE NON INTERFIERE CON LA SUA QUALITÀ DI VITA. ADEMÁS, INDICA CHE PRESENTA SANGRADOS MÍNIMOS OCASIONALES, E CHE NON SI È REGOLATA LA MESTRUAZIONE. BAJO NORMAS DE ASEPSIA Y ANTISEPSIA SE REALIZA CON ÉXITO LA EXTRACCIÓN DEL IMPLANTE SUBDÉRMICO DE ETONOGESTREL 68 MG CON UNA DURACIÓN DE 3 AÑOS, SIN COMPLICACIONES O ALTERACIONES EN EL PROCESO. SE REALIZA CONSEJERÍA EN CUIDADOS POST EXTRACCIÓN, HIGIENE ADECUADA Y REPOSO. TRATAMIENTO: PARACETAMOL 500MG CADA 8 HORAS POR 2 DIAS Y LEVONORGESTREL+ETINILESTRADIOL TABLETA 0.15MG+0.03MG. SE EDUCA ACERCA DE CÓMO ADMINISTRAR LAS PASTILLAS Y DE LA IMPORTANCIA DE RECORDARLAS TODOS LOS DÍAS. ADICIONALMENTE SE ENTREGA CARNET CEMA SE EXPLICAN BENEFICIOS Y FORMA DE UTILIZARLO."
+                text: "PACIENTE FEMENINA DE 17 AÑOS DE EDAD, MESTIZA, HETEROSEXUAL, G1 P1 HV1, FUP 07/10/2022, CON COLOCACION DE IMPLANTE SUBDERMICO DE 3 AÑOS HACE UN MES, ACUDE A CONSULTA PARA SUPERVISIÓN DE IMPLANTE. PACIENTE INDICA QUE DESDE COLOCACIÓN DEL MISMO, PRESENTA CEFALEA FRONTAL TIPO PULSÁTIL DE LEVE INTENSIDAD 4/10 QUE APARECE 2 VECES POR SEMANA Y DESAPARECE ESPONTÁNEAMENTE, INDICA QUE NO INTERFIERE CON SU CALIDAD DE VIDA. ADEMÁS, INDICA QUE PRESENTA SANGRADOS MÍNIMOS OCASIONALES, Y QUE NO SE HA REGULADO MENSTRUACIÓN. BAJO NORMAS DE ASEPSIA Y ANTISEPSIA SE REALIZA CON ÉXITO LA EXTRACCIÓN DEL IMPLANTE SUBDÉRMICO DE ETONOGESTREL 68 MG CON UNA DURACIÓN DE 3 AÑOS, SIN COMPLICACIONES O ALTERACIONES EN EL PROCESO. SE REALIZA CONSEJERÍA EN CUIDADOS POST EXTRACCIÓN, HIGIENE ADECUADA Y REPOSO. TRATAMIENTO: PARACETAMOL 500MG CADA 8 HORAS POR 2 DIAS Y LEVONORGESTREL+ETINILESTRADIOL TABLETA 0.15MG+0.03MG. SE EDUCA ACERCA DE CÓMO ADMINISTRAR LAS PASTILLAS Y DE LA IMPORTANCIA DE RECORDARLAS TODOS LOS DÍAS. ADICIONALMENTE SE ENTREGA CARNET CEMA SE EXPLICAN BENEFICIOS Y FORMA DE UTILIZARLO.",
+                physicalExamText: ""
             }
         ],
         "EMBARAZADAS": [
             {
                 title: "Control Prenatal",
-                text: "PACIENTE FEMENINA DE 38 AÑOS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS, ANTECEDENTES QUIRÚRGICOS: CESÁREA. NIEGA ALERGIA. APF: MADRE HTA. AGO G1 A0 P0 C1 PIG 2 AÑOS. ACUDE A CONSULTA PARA CONTROL PRENATAL, CURSA EMBARAZO DE 20.5 SEMANAS DE GESTACIÓN POR FUM 12/10/2024 CON FPP: 19/07/2024. SEGÚN ECOGRAFÍA DEL 2DO TRIMESTRE REPORTA PRODUCTO ÚNICO TRANSVERSO DE 20.5 SG DE PLACENTA NORMOINSERTA. PACIENTE NO REFIERE SINTOMATOLOGÍA. NIEGA PÉRDIDAS TRANSVAGINALES, MIEMBROS INFERIORES SIN EDEMA, ROTS CONSERVADOS. SE EVIDENCIA ALERTA, ESTABLE Y COLABORADORA. TOMA HIERRO MÁS ÁCIDO FÓLICO QD. TAMIZAJE DE VIOLENCIA NEGATIVA."
-            },
-            {
-                title: "Examen Físico Obstétrico",
-                text: "PACIENTE CON BUENA APARIENCIA GENERAL, VIGIL ORIENTADO EN TIEMPO, ESPACIO Y PERSONA. CABEZA: CABELLO DE IMPLANTACIÓN NORMAL PARA EDAD Y SEXO. CAE: PERMEABLE. OJOS: PUPILAS NORMORREACTIVAS, REFLEJO FOTOMOTOR PRESENTE. NARIZ: FOSAS NASALES PERMEABLES SIN CONGESTIÓN O ERITEMA. OROFARINGE: NO ERITEMATOSA O CONGESTIVA, SIN HIPERTROFIA O EXUDADO AMIGDALAR. MUCOSAS: HIDRATADAS. CUELLO: MÓVIL SIMÉTRICO SIN ADENOPATÍAS. TÓRAX: SIMÉTRICO, EXPANSIBILIDAD CONSERVADA. PULMONES: MURMULLO ALVEOLAR, NO RUIDOS SOBREAÑADIDOS. CORAZÓN RÍTMICO SIN SOPLOS. ABDOMEN BLANDO, DEPRESIBLE, NO DOLOROSO A LA PALPACIÓN SUPERFICIAL NI PROFUNDA, RUIDOS HIDROAÉREOS PRESENTES, GLOBOSO POR ÚTERO GESTANTE, AFU 28 CM FCF 155 LPM POSICIÓN INDETERMINADA, MOVIMIENTOS FETALES PRESENTES. REGIÓN LUMBAR: NO DEFORMIDADES. REGIÓN INGUINO-GENITAL: NO SE APRECIA ALTERACIONES EVIDENTES. EXTREMIDADES: MÓVILES, SIMÉTRICAS, SIN EDEMA, TONO Y FUERZA MUSCULAR CONSERVADA."
+                text: "PACIENTE FEMENINA DE 38 AÑOS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS, ANTECEDENTES QUIRÚRGICOS: CESÁREA. NIEGA ALERGIA. APF: MADRE HTA. AGO G1 A0 P0 C1 PIG 2 AÑOS. ACUDE A CONSULTA PARA CONTROL PRENATAL, CURSA EMBARAZO DE 20.5 SEMANAS DE GESTACIÓN POR FUM 12/10/2024 CON FPP: 19/07/2024. SEGÚN ECOGRAFÍA DEL 2DO TRIMESTRE REPORTA PRODUCTO ÚNICO TRANSVERSO DE 20.5 SG DE PLACENTA NORMOINSERTA. PACIENTE NO REFIERE SINTOMATOLOGÍA. NIEGA PÉRDIDAS TRANSVAGINALES.",
+                physicalExamText: "MIEMBROS INFERIORES SIN EDEMA, ROTS CONSERVADOS. SE EVIDENCIA ALERTA, ESTABLE Y COLABORADORA. TOMA HIERRO MÁS ÁCIDO FÓLICO QD. TAMIZAJE DE VIOLENCIA NEGATIVA."
             },
             {
                 title: "Captación / Primer Control",
-                text: "PACIENTE DE 22 AÑOS DE EDAD, ASINTOMÁTICA SIN ANTECEDENTES PATOLÓGICOS PERSONALES, APF: MADRE HTA. APQX NO REFIERE, ALERGIAS NO REFIERE, AGO PRIMIGESTA, EMBARAZO NO PLANIFICADO SIN USO DE MÉTODO ANTICONCEPTIVO, MENARQUIA 12 AÑOS, 1RA RELACION SEXUAL 15 AÑOS, PAREJAS SEXUALES 2, RELACIÓN DE PAREJA 11 MESES. ACUDE PARA CAPTACIÓN DE EMBARAZO Y PRIMER CONTROL PRENATAL CON FUM 21/09/2022 CURSANDO EMBARAZO DE 8.2 SG. SE SOLICITA ECOGRAFÍA INSTITUCIONAL PARA LAS SEMANAS 11 - 13 DE GESTACIÓN PREVIO A PRÓXIMA CONSULTA, FPP 28/06/2022. \n\nAL EXAMEN FÍSICO ABDOMEN GLOBOSO POR ÚTERO GESTANTE, POSICIÓN Y PRESENTACIÓN INDETERMINADO, AFU 26 CM, FCF 135 LPM, MOVIMIENTOS FETALES PERCIBIDOS POR LA MADRE, NIEGA PÉRDIDAS TRANSVAGINALES, MIEMBROS INFERIORES SIN EDEMA, ROTS CONSERVADOS. SE EVIDENCIA ALERTA, ESTABLE Y COLABORADORA. TOMA HIERRO MÁS ÁCIDO FÓLICO QD. CALCIO 500MG TID Y ÁCIDO ACETILSALICÍLICO 100 MG QD."
+                text: "PACIENTE DE 22 AÑOS DE EDAD, ASINTOMÁTICA SIN ANTECEDENTES PATOLÓGICOS PERSONALES, APF: MADRE HTA. APQX NO REFIERE, ALERGIAS NO REFIERE, AGO PRIMIGESTA, EMBARAZO NO PLANIFICADO SIN USO DE MÉTODO ANTICONCEPTIVO, MENARQUIA 12 AÑOS, 1RA RELACION SEXUAL 15 AÑOS, PAREJAS SEXUALES 2, RELACIÓN DE PAREJA 11 MESES. ACUDE PARA CAPTACIÓN DE EMBARAZO Y PRIMER CONTROL PRENATAL CON FUM 21/09/2022 CURSANDO EMBARAZO DE 8.2 SG. SE SOLICITA ECOGRAFÍA INSTITUCIONAL PARA LAS SEMANAS 11 - 13 DE GESTACIÓN PREVIO A PRÓXIMA CONSULTA, FPP 28/06/2022.",
+                physicalExamText: "ABDOMEN GLOBOSO POR ÚTERO GESTANTE, POSICIÓN Y PRESENTACIÓN INDETERMINADO, AFU 26 CM, FCF 135 LPM, MOVIMIENTOS FETALES PERCIBIDOS POR LA MADRE, NIEGA PÉRDIDAS TRANSVAGINALES, MIEMBROS INFERIORES SIN EDEMA, ROTS CONSERVADOS. SE EVIDENCIA ALERTA, ESTABLE Y COLABORADORA. TOMA HIERRO MÁS ÁCIDO FÓLICO QD. CALCIO 500MG TID Y ÁCIDO ACETILSALICÍLICO 100 MG QD."
             },
             {
                 title: "Control Postparto",
-                text: "PACIENTE FEMENINA DE 21 AÑOS, AGO: G1 C1 HV1, ACUDE A CONTROL POST PARTO, REFIERE EVENTO OBSTÉTRICO EL 26/05/2024. CURSA 11 DÍAS DE PUERPERIO MEDIATO, AL MOMENTO NO REFIERE SINTOMATOLOGÍA, NIEGA SANGRADOS, BRINDA LACTANCIA MATERNA EXCLUSIVA CON BUENA TÉCNICA, ADECUADA PRODUCCIÓN LÁCTEA. SCORE MAMA 0.\n\nSE DA ASESORÍA MÉDICA Y SE INDICA LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS, SE ANALIZAN CRITERIOS DE ELEGIBILIDAD: 2 Y SE ESCOGE MÉTODO DESEADO. PACIENTE ESTABLE Y COLABORADORA ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN.\n\nEXAMEN FÍSICO: PACIENTE CONSCIENTE, ORIENTADA. VIGIL. CABEZA NORMOCEFALICA, MUCOSAS ORALES HÚMEDAS. CUELLO SIN ADENOPATÍAS. TÓRAX: SIMÉTRICO, CAMPOS PULMONARES VENTILADOS, RUIDOS CARDIACOS SINCRÓNICOS CON EL PULSO. ABDOMEN BLANDO, DEPRESIBLE, AFU NO PALPABLE, NO DOLOROSO A LA PALPACIÓN. REGIÓN GENITAL SIN SECRECIONES NI LOQUIOS. EXTREMIDADES SIMÉTRICAS, FUERZA Y TONO CONSERVADO, NO EDEMA."
+                text: "PACIENTE FEMENINA DE 21 AÑOS, AGO: G1 C1 HV1, ACUDE A CONTROL POST PARTO, REFIERE EVENTO OBSTÉTRICO EL 26/05/2024. CURSA 11 DÍAS DE PUERPERIO MEDIATO, AL MOMENTO NO REFIERE SINTOMATOLOGÍA, NIEGA SANGRADOS, BRINDA LACTANCIA MATERNA EXCLUSIVA CON BUENA TÉCNICA, ADECUADA PRODUCCIÓN LÁCTEA. SCORE MAMA 0.\n\nSE DA ASESORÍA MÉDICA Y SE INDICA LOS DIFERENTES MÉTODOS ANTICONCEPTIVOS, SE ANALIZAN CRITERIOS DE ELEGIBILIDAD: 2 Y SE ESCOGE MÉTODO DESEADO. PACIENTE ESTABLE Y COLABORADORA ACEPTA COLOCACIÓN DE MÉTODO DE PLANIFICACIÓN.",
+                physicalExamText: "PACIENTE CONSCIENTE, ORIENTADA EN TIEMPO ESPACIO Y PERSONA. VIGIL. CABEZA NORMOCEFALICA, MUCOSAS ORALES HÚMEDAS. CUELLO SIN ADENOPATÍAS. TÓRAX: SIMÉTRICO, CAMPOS PULMONARES VENTILADOS, RUIDOS CARDIACOS SINCRÓNICOS CON EL PULSO. ABDOMEN BLANDO, DEPRESIBLE, AFU NO PALPABLE, NO DOLOROSO A LA PALPACIÓN, RHA CONSERVADOS. REGIÓN GENITAL SIN SECRECIONES NI LOQUIOS. EXTREMIDADES SIMÉTRICAS, FUERZA Y TONO CONSERVADO, NO EDEMA."
             }
         ],
         "GINECOLOGÍA": [
             {
                 title: "Toma de PAP",
-                text: "PACIENTE FEMENINA DE 24 AÑOS DE EDAD, MESTIZA, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. NO REFIERE ANTECEDENTES QUIRÚRGICOS. AGO: G1 P1 C1 HV1 FUP: 07/2/16. METODO DE PLANIFICACION FAMILIAR: IMPLANTE SUBDÉRMICO DE 5 AÑOS COLOCADO EL 14/9/2020, FUM 12/6/2023, ÚLTIMA CITOLOGÍA: -. MENARQUIA 14 AÑOS. IRS: 16 AÑOS. ACUDE A CONSULTA PARA SOLICITAR QUE SE LE REALICE PAP TEST DE CONTROL, DEBIDO A NUNCA HABERSE REALIZADO ESTUDIO DE CITOLOGÍA. PACIENTE CUMPLE CON LOS REQUISITOS PARA CITOLOGÍA SEGÚN INTERROGATORIO, SE LE BRINDA ASESORÍA SOBRE EL PROCEDIMIENTO. SE PROCEDE A LA REALIZACIÓN DE PAP COMO MÉTODO DE DETECCIÓN PRECOZ DE TUMOR DE CUELLO UTERINO. SE REALIZA SIN NINGUNA COMPLICACIÓN, CONTROL SUBSECUENTE CON RESULTADOS EN 3 MESES."
+                text: "PACIENTE FEMENINA DE 24 AÑOS DE EDAD, MESTIZA, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. NO REFIERE ANTECEDENTES QUIRÚRGICOS. AGO: G1 P1 C1 HV1 FUP: 07/2/16. METODO DE PLANIFICACION FAMILIAR: IMPLANTE SUBDÉRMICO DE 5 AÑOS COLOCADO EL 14/9/2020, FUM 12/6/2023, ÚLTIMA CITOLOGÍA: -. MENARQUIA 14 AÑOS. IRS: 16 AÑOS. ACUDE A CONSULTA PARA SOLICITAR QUE SE LE REALICE PAP TEST DE CONTROL, DEBIDO A NUNca HABERSE REALIZADO ESTUDIO DE CITOLOGÍA. PACIENTE CUMPLE CON LOS REQUISITOS PARA CITOLOGÍA SEGÚN INTERROGATORIO, SE LE BRINDA ASESORÍA SOBRE EL PROCEDIMIENTO. SE PROCEDE A LA REALIZACIÓN DE PAP COMO MÉTODO DE DETECCIÓN PRECOZ DE TUMOR DE CUELLO UTERINO. SE REALIZA SIN NINGUNA COMPLICACIÓN, CONTROL SUBSECUENTE CON RESULTADOS EN 3 MESES.\n\nEVOLUCIÓN: SE REALIZA CITOLOGÍA CERVICAL SIN COMPLICACIONES, SE EXPLICA PLAZO DE ESPERA Y SE BRINDA ASESORÍA.",
+                physicalExamText: ""
             },
             {
                 title: "No se realiza PAP",
-                text: "PACIENTE DE SEXO FEMENINO DE 27 AÑOS DE EDAD SIN ANTECEDENTES PATOLOGICOS PERSONALES, NI FAMILIARES, APQX NO REFIERE, NIEGA ALERGIAS, AGO G1 A0 P1 C0. ACUDE AL CENTRO DE SALUD PARA REALIZACIÓN ANUAL DE PAP. TEST COMO MÉTODO DE DETECCIÓN PRECOZ DE TUMOR DE CUELLO UTERINO. PERO NO CUMPLE PARÁMETROS SE SOLICITA REGRESE EN OTRA FECHA."
+                text: "PACIENTE DE SEXO FEMENINO DE 27 AÑOS DE EDAD SIN ANTECEDENTES PATOLOGICOS PERSONALES, NI FAMILIARES, APQX NO REFIERE, NIEGA ALERGIAS, AGO G1 A0 P1 C0. ACUDE AL CENTRO DE SALUD PARA REALIZACIÓN ANUAL DE PAP. TEST COMO MÉTODO DE DETECCIÓN PRECOZ DE TUMOR DE CUELLO UTERINO. PERO NO CUMPLE PARÁMETROS SE SOLICITA REGRESE EN OTRA FECHA.",
+                physicalExamText: ""
             },
             {
                 title: "Menopausia",
-                text: "PACIENTE ACUDE A CONSULTA POR REFERIR AMENORREA DE 2 MESES, PACIENTE CON LIGADURA DE TROMPAS QUE SE ACOMPAÑA DE SOFOCOS Y DIAFORESIS NOCTURNA, CAMBIOS EMOCIONALES ESPORÁDICOS Y CEFALEA. TAMIZAJE DE VIOLENCIA NEGATIVO."
+                text: "PACIENTE ACUDE A CONSULTA POR REFERIR AMENORREA DE 2 MESES, PACIENTE CON LIGADURA DE TROMPAS QUE SE ACOMPAÑA DE SOFOCOS Y DIAFORESIS NOCTURNA, CAMBIOS EMOCIONALES ESPORÁDICOS Y CEFALEA. TAMIZAJE DE VIOLENCIA NEGATIVO.",
+                physicalExamText: ""
             }
         ],
         "NIÑOS": [
             {
                 title: "Control Niño Sano",
-                text: "PACIENTE MASCULINO / FEMENINA DE 1 AÑO 6 MESES DE EDAD. SIN APP. ACUDE EN COMPAÑÍA DE SU MADRE A CONTROL MÉDICO DE RUTINA. NO REFIERE SINTOMATOLOGÍA. ESTADO NUTRICIONAL ADECUADO PARA LA EDAD, DESARROLLO PSICOMOTOR NORMAL PARA LA EDAD. ESQUEMA DE INMUNIZACIONES ADECUADO. PACIENTE ESTABLE Y COLABORADORA, SE REALIZA CONTROL SIN NOVEDADES. TAMIZAJE DE VIOLENCIA NEGATIVO.\n\nEXAMEN FÍSICO: CABEZA: NORMOCEFALICA. OJOS: ISOCORIA, NORMORREACTIVAS, CONJUNTIVAS ROSADAS.OÍDOS: CONDUCTO AUDITIVO EXTERNO PERMEABLE. NARIZ: FOSAS NASALES PERMEABLES. BOCA: MUCOSAS ORALES HÚMEDAS. OROFARINGE: SIN ALTERACIÓN. CUELLO: SIMÉTRICO SIN ADENOPATÍAS. TÓRAX: ELASTICIDAD Y EXPANSIBILIDAD CONSERVADA. MURMULLO VESICULAR CONSERVADO. CORAZÓN: RUIDOS CARDÍACOS NORMOFONÉTICOS. ABDOMEN: BLANDO, DEPRESIBLE, NO DOLOROSO. EXTREMIDADES: SIMÉTRICAS SIN ALTERACIÓN. EXAMEN NEUROLÓGICO: DENVER II NORMAL."
+                text: "PACIENTE MASCULINO / FEMENINA DE 1 AÑO 6 MESES DE EDAD. SIN APP. ACUDE EN COMPAÑÍA DE SU MADRE A CONTROL MÉDICO DE RUTINA. NO REFIERE SINTOMATOLOGÍA. ESTADO NUTRICIONAL ADECUADO PARA LA EDAD, DESARROLLO PSICOMOTOR NORMAL PARA LA EDAD. ESQUEMA DE INMUNIZACIONES ADECUADO. PACIENTE ESTABLE Y COLABORADORA, SE REALIZA CONTROL SIN NOVEDADES. TAMIZAJE DE VIOLENCIA NEGATIVO.",
+                physicalExamText: "CABEZA: NORMOCEFALICA. OJOS: ISOCORIA, NORMORREACTIVAS, CONJUNTIVAS ROSADAS.OÍDOS: CONDUCTO AUDITIVO EXTERNO PERMEABLE. NARIZ: FOSAS NASALES PERMEABLES. BOCA: MUCOSAS ORALES HÚMEDAS. OROFARINGE: SIN ALTERACIÓN. CUELLO: SIMÉTRICO SIN ADENOPATÍAS. TÓRAX: ELASTICIDAD Y EXPANSIBILIDAD CONSERVADA. MURMULLO VESICULAR CONSERVADO. CORAZÓN: RUIDOS CARDÍACOS NORMOFONÉTICOS. ABDOMEN: BLANDO, DEPRESIBLE, NO DOLOROSO A PALPACIÓN SUPERFICIAL NI PROFUNDA. EXTREMIDADES: SIMÉTRICAS SIN ALTERACIÓN. EXAMEN NEUROLÓGICO: DENVER II NORMAL."
             },
             {
                 title: "Recién Nacido (0-28 días)",
-                text: "PACIENTE MASCULINO/FEMENINA DE 2 DÍAS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. ACUDE A CONSULTA MÉDICA EN COMPAÑÍA DE SUS PADRES POR CONTROL MÉDICO DE RUTINA. PRODUCTO DE PARTO VAGINAL, SIN COMPLICACIONES. APGAR 8-9. PESO AL NACER 3500. TALLA 49 CM, PC 35 CM. ALIMENTACIÓN A BASE DE LECHE MATERNA EXCLUSIVA. BUEN AGARRE Y SUCCIÓN. MICCIÓN Y DEPOSICIONES ESPONTÁNEA. NO REFIERE SINTOMATOLOGÍA. ESTADO NUTRICIONAL CORRECTO PARA LA EDAD, DESARROLLO PSICOMOTOR NORMAL. REFLEJOS ARCAICOS CONSERVADOS. ESQUEMA DE VACUNACIÓN COMPLETO. TAMIZAJE AUDITIVO Y METABÓLICO COMPLETADOS. PACIENTE ALERTA, ACTIVO E IRRITABLE. TAMIZAJE DE VIOLENCIA NEGATIVO."
+                text: "PACIENTE MASCULINO/FEMENINA DE 2 DÍAS DE EDAD, SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. ACUDE A CONSULTA MÉDICA EN COMPAÑÍA DE SUS PADRES POR CONTROL MÉDICO DE RUTINA. PRODUCTO DE PARTO VAGINAL, SIN COMPLICACIONES INTRAPARTO. APGAR 8-9. PESO AL NACER 3500. TALLA 49 CM, PC 35 CM. ALIMENTACIÓN A BASE DE LECHE MATERNA EXCLUSIVA. NO HAY ALTERACIONES EN LA TÉCNICA DE LACTANCIA, BUEN AGARRE Y SUCCIÓN. MICCIÓN Y DEPOSICIONES ESPONTÁNEA. NO REFIERE SINTOMATOLOGÍA. ESTADO NUTRICIONAL CORRECTO PARA LA EDAD, DESARROLLO PSICOMOTOR NORMAL PARA LA EDAD. REFLEJOS ARCAICOS CONSERVADOS. ESQUEMA DE VACUNACIÓN COMPLETO PARA LA EDAD. TAMIZAJE AUDITIVO Y METABÓLICO COMPLETADOS. PACIENTE ALERTA, ACTIVO E IRRITABLE. TAMIZAJE DE VIOLENCIA NEGATIVO.",
+                physicalExamText: "PACIENTE ACTIVO Y REACTIVO AL MANEJO; PIEL ROSADA, CABEZA: NORMOCEFALICA, FONTANELA ANTERIOR Y POSTERIOR NORMOTENSAS. PUPILAS: ISOCÓRICAS NORMORREACTIVAS; NARIZ: PERMEABLE; OREJAS: IMPLANTACIÓN ADECUADA DE PABELLONES AURICULARES, CONDUCTOS AUDITIVOS EXTERNOS PERMEABLES, BOCA: OROFARINGE NO ERITEMATOSA, PRESENCIA DE PERLAS DENTALES, PALADAR ÍNTEGRO; CUELLO: SIMÉTRICO, MÓVIL, NO ADENOMEGALIAS; TÓRAX: SIMÉTRICO, EXPANSIBILIDAD CONSERVADA, NO SIGNOS DE DIFICULTAD RESPIRATORIA, PULMONES: MURMULLO VESICULAR CONSERVADO EN AMBOS CAMPOS PULMONARES, NO SE AUSCULTAN RUIDOS SOBREAÑADIDOS, CORAZÓN: RUIDOS CARDIACOS RÍTMICOS, NO SE AUSCULTAN SOPLOS; ABDOMEN: RUIDOS HIDROAÉREOS PRESENTES, SUAVE, DEPRESIBLE, APARENTA NO DOLOROSO, OMBLIGO SIN SIGNOS DE INFECCIÓN, LIMPIO Y SECO; REGIÓN INGUINO GENITAL: GENITALES EXTERNOS MASCULINOS, TESTÍCULOS EN ESCROTO /   GENITALES EXTERNOS FEMENINOS, BARLOW Y ORTOLANI NEGATIVOS, REFLEJOS ARCAICOS CONSERVADOS (MORO, SUCCIÓN, BÚSQUEDA, MARCHA, BABINSKI, PRENSIÓN PLANTAR Y PALMAR). PULSOS FEMORALES PRESENTES, LLENADO CAPILAR MENOR A 2 SEGUNDOS."
             },
             {
                 title: "Control Escolar",
-                text: "SE REALIZA CONTROL MÉDICO ESCOLAR A PACIENTE FEMENINA / MASCULINO DE 6 AÑOS DE EDAD, SIN ANTECEDENTES DE INTERÉS. NIEGA ALERGIAS. INDICA ALIMENTARSE DE FORMA ADECUADA. MICCIÓN Y DEPOSICIONES ESPONTÁNEAS. PACIENTE TRANQUILO ENCONTRÁNDOSE EN SUS LABORES ESCOLARES DIARIAS, NO REFIERE SINTOMATOLOGÍA. EN EXAMEN FÍSICO NO SE EVIDENCIAN ALTERACIONES. TAMIZAJE VISUAL 20/20 BILATERAL. TAMIZAJE DE VIOLENCIA NEGATIVO."
+                text: "SE REALIZA CONTROL MÉDICO ESCOLAR A PACIENTE FEMENINA / MASCULINO DE 6 AÑOS DE EDAD, SIN ANTECEDENTES DE INTERÉS. NIEGA ALERGIAS. INDICA ALIMENTARSE DE FORMA ADECUADA. MICCIÓN Y DEPOSICIONES ESPONTÁNEAS. PACIENTE TRANQUILO ENCONTRÁNDOSE EN SUS LABORES ESCOLARES DIARIAS, NO REFIERE SINTOMATOLOGÍA. EN EXAMEN FÍSICO NO SE EVIDENCIAN ALTERACIONES. TAMIZAJE VISUAL 20/20 BILATERAL.  TAMIZAJE DE VIOLENCIA NEGATIVO.",
+                physicalExamText: "CABEZA: NORMOCEFALICA. OJOS: ISOCORIA, NORMORREACTIVAS, CONJUNTIVAS ROSADAS.OÍDOS: CONDUCTO AUDITIVO EXTERNO PERMEABLE. NARIZ: FOSAS NASALES PERMEABLES. BOCA: MUCOSAS ORALES HÚMEDAS. OROFARINGE: SIN ALTERACIÓN. CUELLO: SIMÉTRICO SIN ADENOPATÍAS. TÓRAX: ELASTICIDAD Y EXPANSIBILIDAD CONSERVADA. MURMULLO VESICULAR CONSERVADO. CORAZÓN: RUIDOS CARDÍACOS NORMOFONÉTICOS. ABDOMEN: BLANDO, DEPRESIBLE, NO DOLOROSO A PALPACIÓN SUPERFICIAL NI PROFUNDA. EXTREMIDADES: SIMÉTRICAS SIN ALTERACIÓN. \n\nEXAMEN NEUROLÓGICO: DENVER II NORMAL."
             }
         ],
         "ADOLESCENTES": [
             {
                 title: "Control Adolescente",
-                text: "PACIENTE MASCULINO / FEMENINA DE 15 AÑOS DE EDAD. SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. NIEGA ALERGIAS. ALIMENTACIÓN BALANCEADA. ACUDE SOLO / EN COMPAÑÍA DE SU MADRE A CONSULTA POR PRESENTAR CEFALEA. ESTADO NUTRICIONAL ADECUADO PARA LA EDAD. PACIENTE ESTABLE, ALERTA Y ACTIVO. TAMIZAJE DE VIOLENCIA NEGATIVO.\n\nEXAMEN FÍSICO: PACIENTE CONSCIENTE, ORIENTADO, HIDRATADO AFEBRIL; CABEZA: NORMOCEFALICA, PUPILAS: ISOCÓRICAS NORMORREACTIVAS; BOCA: OROFARINGE NO ERITEMATOSA; CUELLO: MÓVIL, NO ADENOMEGALIAS; TÓRAX: SIMÉTRICO, PULMONES: MURMULLO VESICULAR CONSERVADO, CORAZÓN: RUIDOS CARDIACOS RÍTMICOS; ABDOMEN: SUAVE, DEPRESIBLE, NO DOLOROSO; EXTREMIDADES SIMÉTRICAS, NO EDEMA."
+                text: "PACIENTE MASCULINO / FEMENINA DE 15 AÑOS DE EDAD. SIN ANTECEDENTES PATOLÓGICOS DE INTERÉS. NIEGA ALERGIAS. ALIMENTACIÓN BALANCEADA. ACUDE SOLO / EN COMPAÑÍA DE SU MADRE A CONSULTA POR PRESENTAR CEFALEA. ESTADO NUTRICIONAL ADECUADO PARA LA EDAD. PACIENTE ESTABLE, ALERTA Y ACTIVO. PACIENTE ESTABLE Y COLABORADORA, SE REALIZA CONTROL SIN NOVEDADES. TAMIZAJE DE VIOLENCIA NEGATIVO.",
+                physicalExamText: "PACIENTE CONSCIENTE, ORIENTADO, HIDRATADO AFEBRIL; CABEZA: NORMOCEFALICA, CONJUNTIVAS: ROSADAS, PUPILAS: ISOCÓRICAS NORMORREACTIVAS; NARIZ: PERMEABLE; BOCA: OROFARINGE NO ERITEMATOSA, PIEZAS DENTALES EN BUEN ESTADO. CUELLO: SIMÉTRICO, MÓVIL, NO ADENOMEGALIAS. TÓRAX: SIMÉTRICO, EXPANSIBILIDAD CONSERVADA, NO SIGNOS DE DIFICULTAD RESPIRATORIA, PULMONES: MURMULLO VESICULAR CONSERVADO EN AMBOS CAMPOS PULMONARES, NO SE AUSCULTAN RUIDOS SOBREAÑADIDOS, CORAZÓN: RUIDOS CARDIACOS RÍTMICOS, NO SE AUSCULTAN SOPLOS. ABDOMEN: RUIDOS HIDROAÉREOS PRESENTES, SUAVE, DEPRESIBLE, NO DOLOROSO A LA PALPACIÓN. EXTREMIDADES SIMÉTRICAS, NO EDEMA.\n\nREGIÓN INGUINO GENITAL: GENITALES EXTERNOS MASCULINOS, TESTÍCULOS EN ESCROTO."
             }
         ],
         "ADULTOS": [
              {
                 title: "Control Adulto",
-                text: "PACIENTE FEMENINA / MASCULINO DE 60 AÑOS SIN APP DE IMPORTANCIA, NIEGA ALERGIAS. AL MOMENTO REFIERE CEFALEA. SIGNOS VITALES DENTRO DE PARÁMETROS NORMALES. TAMIZAJE DE VIOLENCIA NEGATIVO.\n\nEXAMEN FÍSICO: CONSCIENTE, ORIENTADO, HIDRATADO, AFEBRIL; CABEZA: NORMOCEFALICA, CONJUNTIVAS: ROSADAS, PUPILAS: ISOCÓRICAS NORMORREACTIVAS; NARIZ: PERMEABLE; BOCA: OROFARINGE NO ERITEMATOSA, PIEZAS DENTALES EN BUEN ESTADO; CUELLO: SIMÉTRICO, MÓVIL, NO ADENOMEGALIAS; TÓRAX: SIMÉTRICO, EXPANSIBILIDAD CONSERVADA, SIN SIGNOS DE DIFICULTAD RESPIRATORIA, PULMONES: MURMULLO VESICULAR CONSERVADO, CORAZÓN: RUIDOS CARDIACOS RÍTMICOS, NO SOPLOS; ABDOMEN: SUAVE, DEPRESIBLE, NO DOLOROSO; EXTREMIDADES SIMÉTRICAS, NO EDEMA."
+                text: "PACIENTE FEMENINA / MASCULINO DE 60 AÑOS SIN APP DE IMPORTANCIA, NIEGA ALERGIAS. AL MOMENTO REFIERE CEFALEA. SIGNOS VITALES DENTRO DE PARÁMETROS NORMALES. TAMIZAJE DE VIOLENCIA NEGATIVO.",
+                physicalExamText: "CONSCIENTE, ORIENTADO, HIDRATADO, AFEBRIL; CABEZA: NORMOCEFALICA, CONJUNTIVAS: ROSADAS, PUPILAS: ISOCÓRICAS NORMORREACTIVAS; NARIZ: PERMEABLE; BOCA: OROFARINGE NO ERITEMATOSA, PIEZAS DENTALES EN BUEN ESTADO; CUELLO: SIMÉTRICO, MÓVIL, NO ADENOMEGALIAS; TÓRAX: SIMÉTRICO, EXPANSIBILIDAD CONSERVADA, SIN SIGNOS DE DIFICULTAD RESPIRATORIA, PULMONES: MURMULLO VESICULAR CONSERVADO EN AMBOS CAMPOS PULMONARES, NO SE AUSCULTAN RUIDOS SOBREAÑADIDOS, CORAZÓN: RUIDOS CARDIACOS RÍTMICOS, NO SE AUSCULTAN SOPLOS; ABDOMEN: RUIDOS HIDROAÉREOS PRESENTES, SUAVE, DEPRESIBLE, NO DOLOROSO A LA PALPACIÓN; EXTREMIDADES SIMÉTRICAS, NO EDEMA. \nREGIÓN INGUINO GENITAL: GENITALES EXTERNOS MASCULINOS, TESTÍCULOS EN ESCROTO"
             },
             {
                 title: "Visita Domiciliaria",
-                text: "SE REALIZA CONTROL MÉDICO A PACIENTE FEMENINO/MASCULINO DE 51 AÑOS DE EDAD, NIEGA ANTECEDENTES PATOLÓGICOS DE IMPORTANCIA. NO REFIERE ANTECEDENTES QUIRÚRGICOS. NIEGA ALERGIAS. INDICA ALIMENTARSE DE FORMA ADECUADA. MICCIÓN Y DEPOSICIONES ESPONTÁNEAS. PACIENTE TRANQUILA EN CONTROL MÉDICO. AL MOMENTO NO REFIERE SINTOMATOLOGÍA. PACIENTE ESTABLE Y COLABORADORA. SE RECOMIENDA A PACIENTE MANTENER SU MEDICACIÓN. TAMIZAJE DE VIOLENCIA NEGATIVO."
+                text: "SE REALIZA CONTROL MÉDICO A PACIENTE FEMENINO/MASCULINO DE 51 AÑOS DE EDAD, NIEGA ANTECEDENTES PATOLÓGICOS DE IMPORTANCIA. NO REFIERE ANTECEDENTES QUIRÚRGICOS. NIEGA ALERGIAS. INDICA ALIMENTARSE DE FORMA ADECUADA. MICCIÓN Y DEPOSICIONES ESPONTÁNEAS. PACIENTE TRANQUILA EN CONTROL MÉDICO. AL MOMENTO NO REFIERE SINTOMATOLOGÍA. PACIENTE ESTABLE Y COLABORADORA. SE RECOMIENDA A PACIENTE MANTENER SU MEDICACIÓN.  TAMIZAJE DE VIOLENCIA NEGATIVO.",
+                physicalExamText: "SE REALIZA INMUNIZACIÓN Y CONTROL SIN NOVEDADES."
             },
             {
                 title: "Bono JGL",
-                text: "MOTIVO DE CONSULTA: VISITA DOMICILIARIA A BENEFICIARIO DE BONO JGL.\n\nANAMNESIS: SE REALIZA CONTROL MÉDICO A PACIENTE FEMENINO / MASCULINO DE 51 AÑOS DE EDAD, BENEFICIARIO DEL BONO JGL, CON ANTECEDENTES DE DISCAPACIDAD INTELECTUAL DEL 90%. NO REFIERE ANTECEDENTES QUIRÚRGICOS. NIEGA ALERGIAS. SE ALIMENTA DE FORMA ADECUADA. AL MOMENTO NO REFIERE SINTOMATOLOGÍA. AL EXAMEN FÍSICO NO SE EVIDENCIAN ALTERACIONES O SIGNOS VISIBLES QUE DISMINUYAN LA CALIDAD DE VIDA. PACIENTE ESTABLE Y COLABORADORA. CONTROL SIN NOVEDADES. TAMIZAJE DE VIOLENCIA NEGATIVO."
+                text: "MOTIVO DE CONSULTA: VISITA DOMICILIARIA A BENEFICIARIO DE BONO JGL\nANAMNESIS:\nSE REALIZA CONTROL MÉDICO A PACIENTE FEMENINO / MASCULINO DE 51 AÑOS DE EDAD, \nBENEFICIARIO DEL BONO JGL, CON ANTECEDENTES DE DISCAPACIDAD INTELECTUAL DEL 90%. NO REFIERE ANTECEDENTES QUIRÚRGICOS. NIEGA ALERGIAS. SE ALIMENTA DE FORMA ADECUADA. AL MOMENTO NO REFIERE SINTOMATOLOGÍA.",
+                physicalExamText: "AL EXAMEN FÍSICO NO SE EVIDENCIAN ALTERACIONES O SIGNOS VISIBLES QUE DISMINUYAN LA CALIDAD DE VIDA. PACIENTE ESTABLE Y COLABORADORA. CONTROL SIN NOVEDADES.  TAMIZAJE DE VIOLENCIA NEGATIVO."
             },
             {
                 title: "Adulto Mayor",
-                text: "SE REALIZA CONTROL MÉDICO EN CASA DEL ADULTO MAYOR A PACIENTE FEMENINO / MASCULINO DE 84 AÑOS DE EDAD, CON ANTECEDENTES PATOLÓGICOS DE HTA. NO REFIERE ANTECEDENTES QUIRÚRGICOS. INDICA ALIMENTARSE DE FORMA ADECUADA EN CALIDAD Y CANTIDAD. PACIENTE TRANQUILO EN CONTROL MÉDICO. AL MOMENTO NO REFIERE SINTOMATOLOGÍA. NO SE EVIDENCIAN SIGNOS DE ALARMA. PACIENTE ESTABLE Y COLABORADORA. TAMIZAJE DE VIOLENCIA NEGATIVO."
+                text: "SE REALIZA CONTROL MÉDICO EN CASA DEL ADULTO MAYOR A PACIENTE FEMENINO / MASCULINO DE 84 AÑOS DE EDAD, CON ANTECEDENTES PATOLÓGICOS DE HTA. NO REFIERE ANTECEDENTES QUIRÚRGICOS. INDICA ALIMENTARSE DE FORMA ADECUADA EN CALIDAD Y CANTIDAD. PACIENTE TRANQUILO EN CONTROL MÉDICO. AL MOMENTO NO REFIERE SINTOMATOLOGÍA. NO SE EVIDENCIAN SIGNOS DE ALARMA. PACIENTE ESTABLE Y COLABORADORA.  TAMIZAJE DE VIOLENCIA NEGATIVO.",
+                physicalExamText: ""
+            }
+        ],
+        "EXAMEN FÍSICO GENERAL": [
+            {
+                title: "Examen Físico Obstétrico",
+                text: "",
+                physicalExamText: "PACIENTE CON BUENA APARIENCIA GENERAL, VIGIL ORIENTADO EN TIEMPO, ESPACIO Y PERSONA. CABEZA: CABELLO DE IMPLANTACIÓN NORMAL PARA EDAD Y SEXO. CAE: PERMEABLE. OJOS: PUPILAS NORMORREACTIVAS, REFLEJO FOTOMOTOR PRESENTE. NARIZ: FOSAS NASALES PERMEABLES SIN CONGESTIÓN O ERITEMA. OROFARINGE: NO ERITEMATOSA O CONGESTIVA, SIN HIPERTROFIA O EXUDADO AMIGDALAR. MUCOSAS: HIDRATADAS. CUELLO: MÓVIL SIMÉTRICO SIN ADENOPATÍAS. TÓRAX: SIMÉTRICO, EXPANSIBILIDAD CONSERVADA. PULMONES: MURMULLO ALVEOLAR, NO RUIDOS SOBREAÑADIDOS. CORAZÓN RÍTMICO SIN SOPLOS. ABDOMEN BLANDO, DEPRESIBLE, NO DOLOROSO A LA PALPACIÓN SUPERFICIAL NI PROFUNDA, RUIDOS HIDROAÉREOS PRESENTES, GLOBOSO POR ÚTERO GESTANTE, AFU 28 CM FCF 155 LPM POSICIÓN INDETERMINADA, MOVIMIENTOS FETALES PRESENTES. REGIÓN LUMBAR: NO DEFORMIDADES. REGIÓN INGUINO-GENITAL: NO SE APRECIA ALTERACIONES EVIDENTES. EXTREMIDADES: MÓVILES, SIMÉTRICAS, SIN EDEMA, TONO Y FUERZA MUSCULAR CONSERVADA."
+            },
+            {
+                title: "Examen Físico Pediátrico (6m - 2a)",
+                text: "",
+                physicalExamText: "PACIENTE ACTIVO Y REACTIVO AL MANEJO, CONSCIENTE, ORIENTADO, HIDRATADO AFEBRIL, PIEL ROSADA; CABEZA: NORMOCEFALICA, CONJUNTIVAS: ROSADAS, PUPILAS: ISOCÓRICAS NORMORREACTIVAS; NARIZ: PERMEABLE, PRESENCIA DE ABUNDANTE SECRECIÓN; BOCA: OROFARINGE NO ERITEMATOSA, DIENTES EN BUEN ESTADO; CUELLO: SIMÉTRICO, MÓVIL, NO ADENOMEGALIAS; TÓRAX: SIMÉTRICO, EXPANSIBILIDAD CONSERVADA, NO SIGNOS DE DIFICULTAD RESPIRATORIA, PULMONES: MURMULLO VESICULAR CONSERVADO EN AMBOS CAMPOS PULMONARES, NO SE AUSCULTAN RUIDOS SOBREAÑADIDOS, CORAZÓN: RUIDOS CARDIACOS RÍTMICOS, NO SE AUSCULTAN SOPLOS; ABDOMEN: RUIDOS HIDROAÉREOS PRESENTES, SUAVE, DEPRESIBLE, NO DOLOROSO A LA PALPACIÓN; PULSOS FEMORALES PRESENTES, LLENADO CAPILAR MENOR A 2 SEGUNDOS.\nREGIÓN INGUINO GENITAL: GENITALES EXTERNOS MASCULINOS, TESTÍCULOS EN ESCROTO, EXTREMIDADES SIMÉTRICAS."
             }
         ]
     };
+
+     const templatesEvolucion = [
+        { ageMin: 0, ageMax: 12, text: "• Control de crecimiento y desarrollo en 1 mes.\n• Consumo diario de agua segura.\n• Alimentación saludable con frutas, verduras y pocos alimentos ultraprocesados.\n• Mantener higiene personal y lavado frecuente de manos.\n• Cepillado dental después de cada comida.\n• Evitar exposición al humo de tabaco.\n• Jugar o realizar actividad física todos los días.\n• Cumplir esquema de vacunación del MSP." },
+        { ageMin: 13, ageMax: 17, text: "• Control médico cada 3-6 meses.\n• Mantener buena hidratación y alimentación balanceada.\n• Realizar actividad física al menos 1 hora diaria.\n• Evitar consumo de alcohol, tabaco y otras sustancias.\n• Dormir entre 8 y 10 horas diarias.\n• Mantener relaciones familiares y sociales saludables.\n• Promover autocuidado e higiene personal diaria.\n• Utilizar agua segura para beber y cocinar." },
+        { ageMin: 18, ageMax: 39, text: "• Control médico anual o según indicación.\n• Mantener buena hidratación (mínimo 2 litros de agua segura al día).\n• Alimentación equilibrada con bajo consumo de sal, grasas y azúcares.\n• Realizar actividad física regular (al menos 150 min/semana).\n• Evitar consumo de tabaco y limitar bebidas alcohólicas.\n• Dormir de 7 a 8 horas diarias.\n• Mantener peso adecuado y hábitos saludables.\n• Promover entornos libres de contaminación y humo." },
+        { ageMin: 40, ageMax: 64, text: "• Control médico cada 6 meses.\n• Mantener dieta rica en frutas, vegetales y baja en sal.\n• Realizar actividad física moderada diaria.\n• Controlar el peso corporal.\n• Tomar agua segura a lo largo del día.\n• Evitar tabaco y limitar alcohol.\n• Dormir de 7 a 8 horas por noche.\n• Reducir estrés con descanso adecuado y recreación." },
+        { ageMin: 65, ageMax: 120, text: "• Control médico cada 3 a 6 meses.\n• Beber agua segura varias veces al día.\n• Realizar caminatas o ejercicios suaves diarios.\n• Mantener alimentación variada y fácil de digerir.\n• Evitar caídas: usar calzado cómodo y entorno seguro.\n• Dormir bien y descansar durante el día si es necesario.\n• Tomar los medicamentos según indicación médica.\n• Evitar el consumo de alcohol y tabaco." }
+    ];
+    
+    // Lista de recomendaciones para niños y gestantes (de las imágenes)
+    const recsNinoMenor24 = [
+        "NIÑAS Y NIÑOS DE 6 A 24 MESES - HIGIENE CORPORAL - BAÑARSE DIARIAMENTE",
+        "NIÑAS Y NIÑOS DE 6 A 24 MESES - LACTANCIA MATERNA Y ALIMENTACIÓN COMPLEMENTARIA - LACTANCIA MATERNA CONTINÚA ACOMPAÑADA DE ALIMENTACIÓN COMPLEMENTARIA A PARTIR DE LOS 6 MESES HASTA LOS 24 DE MESES O MÁS"
+    ];
+    
+    const recsNino24a59 = [
+        "NIÑAS Y NIÑOS DE 24 A 59 MESES - ALIMENTACIÓN - LA NIÑA O NIÑO DEBE RECIBIR TRES COMIDAS PRINCIPALES: DESAYUNO, ALMUERZO Y MERIENDA, Y DOS REFRIGERIOS NUTRITIVOS, ENTRE LAS COMIDAS",
+        "NIÑAS Y NIÑOS DE 24 A 59 MESES - ACTIVIDAD FÍSICA FORTALECIMIENTO MUSCULAR - REALICE AL MENOS 60 O MÁS MIN DIARIOS DE ACTIVIDAD FÍSICA MODERADA (PASEAR CON LA MASCOTA, BAILAR, ENTRE OTROS) A VIGOROSA (JUEGOS, SALTAR LA CUERDA, ENTRE OTROS)",
+        "NIÑAS Y NIÑOS DE 24 A 59 MESES - ACTIVIDAD FÍSICA FORTALECIMIENTO MUSCULAR - LIMITE EL TIEMPO DE USO DE PANTALLAS",
+        "NIÑAS Y NIÑOS DE 24 A 59 MESES - SALUD MENTAL - MANTENER UN HÁBITO DE SUEÑO DE 10 A 12 HORAS DIARIAS",
+        "NIÑAS Y NIÑOS DE 24 A 59 MESES - HIGIENE CORPORAL - CEPILLADO DENTAL CON LA ASISTENCIA DE LOS PADRES O CUIDADORES",
+        "NIÑAS Y NIÑOS DE 24 A 59 MESES - HIGIENE CORPORAL - BAÑARSE DIARIAMENTE"
+    ];
+
+    const recsGestante = [
+        "GESTANTE - PRENATAL Y PARTO - CAMBIOS FISIOLÓGICOS DEL EMBARAZO",
+        "GESTANTE - PRENATAL Y PARTO - ASESORÍAS SIGNO DE ALARMA DURANTE EL EMBARAZO PARTO Y POSTPARTO",
+        "GESTANTE - PRENATAL Y PARTO - ASISTE A TALLERES DE EDUCACIÓN PRENATAL",
+        "GESTANTE - ALIMENTACIÓN - ALIMENTACIÓN VARIADA Y EQUILIBRADA, PARA UNA ADECUADA GANANCIA DE PESO Y ADECUADO DESARROLLO DEL NIÑO O NIÑA",
+        "GESTANTE - HIGIENE CORPORAL - BAÑARSE DIARIAMENTE",
+        "GESTANTE - ACTIVIDAD FÍSICA FORTALECIMIENTO MUSCULAR - REALICE 10 MIN DIARIOS DE ACTIVIDAD FÍSICA MODERADA (CAMINAR)",
+        "GESTANTE - ACTIVIDAD FÍSICA FORTALECIMIENTO MUSCULAR - REALICE AL MENOS 30 O MÁS MIN DIARIOS DE ACTIVIDAD FÍSICA",
+        "GESTANTE - SALUD MENTAL - ELIMINE EL CONSUMO DE TABACO - TABACO ELECTRÓNICO, BEBIDAS ALCOHÓLICAS (INCLUIDA CERVEZA)",
+        "GESTANTE - SALUD MENTAL - SI PRESENTA PENSAMIENTOS DE SUICIDIO, QUERER HACERSE DAÑO O HACER DAÑO AL BEBÉ, MANIFESTARLOS AL PERSONAL DE SALUD DE MANERA INMEDIATA",
+        "GESTANTE - PREVENCIÓN DE INFECCIONES DE TRANSMISIÓN SEXUAL - USE DOBLE PROTECCIÓN"
+    ];
+
 
     // --- Módulo: utils/db.js ---
     const db = (() => {
@@ -1315,12 +1764,7 @@
         }
         function sanitizeRecordForExport(record) {
             const cleanRecord = JSON.parse(JSON.stringify(record));
-            if (cleanRecord.examenes && cleanRecord.examenes.adjuntos) {
-                cleanRecord.examenes.adjuntos.forEach(adjunto => {
-                    delete adjunto.data;
-                    adjunto.info = "Blob data not included in export.";
-                });
-            }
+            // No need to remove adjuntos anymore as they are not collected
             return cleanRecord;
         }
         function exportAsJSON(record) {
@@ -1330,7 +1774,7 @@
             }
             const cleanRecord = sanitizeRecordForExport(record);
             const jsonString = JSON.stringify(cleanRecord, null, 2);
-            const fileName = `record_${(record.paciente.nombre || record.id).replace(/\s/g, '_')}.json`;
+            const fileName = `record_${(record.paciente.nombre || record.id).replace(/[\\/:"*?<>| ]/g, '_')}.json`;
             downloadFile(jsonString, fileName, 'application/json');
         }
         function exportAsJS(record) {
@@ -1340,7 +1784,7 @@
             }
             const cleanRecord = sanitizeRecordForExport(record);
             const jsContent = `const patientRecord = ${JSON.stringify(cleanRecord, null, 2)};`;
-            const fileName = `record_${(record.paciente.nombre || record.id).replace(/\s/g, '_')}.js`;
+            const fileName = `record_${(record.paciente.nombre || record.id).replace(/[\\/:"*?<>| ]/g, '_')}.js`;
             downloadFile(jsContent, fileName, 'application/javascript');
         }
         function printRecord(record) {
@@ -1367,10 +1811,11 @@
                 </div></section>
                 ${renderText('Revisión por Sistemas', record.revisionSistemas)} ${renderText('Examen Físico', record.examenFisico)}
                 <section class="print-section"><h3>Diagnóstico</h3><div class="print-grid print-full">
-                    ${(record.diagnostico.lista || []).map(dx => `${renderItem(dx.cie10, dx.descripcion)}`).join('')}
+                    ${(record.diagnostico.lista || []).map(dx => `<div class="print-item"><strong>${dx.cie10}:</strong> ${dx.descripcion}</div>`).join('')}
                     ${renderItem('Diferenciales', record.diagnostico.diferenciales)}
                 </div></section>
-                ${renderText('Tratamiento', record.tratamiento)} ${renderText('Recomendaciones', record.recomendaciones)}
+                ${renderText('Tratamiento', record.tratamiento)}
+                ${renderText('Evolución y Recomendaciones', record.evolucion)}
                 <footer class="print-footer"><div class="signature-line"></div><p>Firma y Sello</p></footer>
             `;
             window.print();
@@ -1402,13 +1847,28 @@
         const folderPathEl = document.getElementById('folder-path');
         const recordTimestampsEl = document.getElementById('record-timestamps');
         const templateBtn = document.getElementById('template-btn');
+        const templateBtnPE = document.getElementById('template-btn-pe');
+        const templateBtnEvolucion = document.getElementById('template-btn-evolucion');
         const templateModal = document.getElementById('template-modal');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const templateCategoriesEl = document.getElementById('template-categories');
         const templateListEl = document.getElementById('template-list');
         const findriscForm = document.getElementById('findrisc-form');
         const pahoRiskForm = document.getElementById('paho-risk-form');
-        const dxContainer = document.getElementById('diagnosticos-container');
+        const dxSearchInput = document.getElementById('dx-search-input');
+        const dxChipsContainer = document.getElementById('diagnosticos-chips');
+        const tamizajeViolenciaSelect = document.getElementById('tamizajeViolencia');
+        const tamizajeDetallesGroup = document.getElementById('tamizaje-detalles-group');
+        const noSeRealizaSistemasCheckbox = document.getElementById('noSeRealizaSistemas');
+        const noSeRealizaExamenesCheckbox = document.getElementById('noSeRealizaExamenes');
+        const tipoAtencionSelect = document.getElementById('tipoAtencion');
+        const lugarAtencionSelect = document.getElementById('lugarAtencion');
+        const grupoPrioritarioSelect = document.getElementById('grupoPrioritario');
+        const modeToggle = document.getElementById('mode-toggle');
+        const edadInput = document.getElementById('edad');
+        const edadEnMesesCheckbox = document.getElementById('edad-en-meses');
+        const edadLabel = document.getElementById('edad-label');
+        const edadCalculadaSpan = document.getElementById('edad-calculada');
         
         // --- App State ---
         let state = { 
@@ -1417,7 +1877,8 @@
             autosaveTimeout: null, 
             directoryHandle: null,
             cie10_data: [],
-            activeAutocomplete: { input: null, results: null, index: -1 }
+            activeAutocomplete: { input: null, results: null, index: -1 },
+            templateTargetId: null
         };
 
         // --- Init ---
@@ -1429,6 +1890,8 @@
             setupEventListeners();
             applyInitialTheme();
             applyInitialSidebarState();
+            loadAndApplyLastAttentionSettings();
+            applyInitialMode();
             clearForm();
         }
 
@@ -1469,7 +1932,7 @@
                 results.forEach(item => {
                     const div = document.createElement('div');
                     div.innerHTML = `<small>${item.code}</small>${item.description}`;
-                    div.addEventListener('click', () => selectDx(input, item));
+                    div.addEventListener('click', () => addDxChip(item));
                     resultsDiv.appendChild(div);
                 });
                 input.parentElement.appendChild(resultsDiv);
@@ -1479,10 +1942,28 @@
             }
         }
         
-        function selectDx(input, item) {
-            const dxItem = input.closest('.dx-item');
-            dxItem.querySelector('.dx-description').value = item.description;
-            dxItem.querySelector('.dx-cie10').value = item.code;
+        function addDxChip(item) {
+            // Prevent adding duplicate
+            const existingChips = dxChipsContainer.querySelectorAll('.dx-chip');
+            for (const chip of existingChips) {
+                if (chip.dataset.cie10 === item.code) {
+                    showToast('Diagnóstico ya agregado.', 'info');
+                    dxSearchInput.value = '';
+                    closeAutocomplete();
+                    return;
+                }
+            }
+
+            const chip = document.createElement('div');
+            chip.className = 'dx-chip';
+            chip.dataset.cie10 = item.code;
+            chip.dataset.description = item.description;
+            chip.innerHTML = `
+                <span><small>${item.code}</small> ${item.description}</span>
+                <button typebutton">&times;</button>
+            `;
+            dxChipsContainer.appendChild(chip);
+            dxSearchInput.value = '';
             closeAutocomplete();
         }
         
@@ -1546,7 +2027,8 @@
                 const date = new Date(record.updatedAt);
                 const dateFolder = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                 const dirHandle = await state.directoryHandle.getDirectoryHandle(dateFolder, { create: true });
-                const fileName = `${record.paciente.cedula || 'SIN_CEDULA'}_${(record.paciente.nombre || 'SIN_NOMBRE').replace(/\s+/g, '-')}.json`;
+                const timeString = `${String(date.getHours()).padStart(2, '0')}-${String(date.getMinutes()).padStart(2, '0')}-${String(date.getSeconds()).padStart(2, '0')}`;
+                const fileName = `${timeString}_${(record.paciente.nombre || 'SIN-NOMBRE').replace(/[\s/\\?%*:|"<>]/g, '-')}.json`;
                 const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
                 const writable = await fileHandle.createWritable();
                 await writable.write(JSON.stringify(sanitizeRecordForExport(record), null, 2));
@@ -1563,25 +2045,41 @@
         
         function sanitizeRecordForExport(record) {
             const cleanRecord = JSON.parse(JSON.stringify(record));
-             if (cleanRecord.examenes && cleanRecord.examenes.adjuntos) {
-                delete cleanRecord.examenes.adjuntos;
-            }
+            // No adjuntos anymore
             return cleanRecord;
         }
 
         // --- Template Modal Logic ---
-        function openTemplateModal() {
+        function openTemplateModal(targetId) {
+            state.templateTargetId = targetId;
             templateCategoriesEl.innerHTML = '';
-            Object.keys(templates).forEach((category, index) => {
-                const li = document.createElement('li');
-                li.textContent = category;
-                li.dataset.category = category;
-                templateCategoriesEl.appendChild(li);
-                if (index === 0) {
-                    li.classList.add('active');
-                    displayTemplatesForCategory(category);
+            
+            if (targetId === 'evolucion') {
+                templateListEl.innerHTML = '';
+                templateCategoriesEl.innerHTML = `<li>Recomendaciones por Edad</li>`;
+                templateCategoriesEl.querySelector('li').classList.add('active');
+                const age = getAgeInYears();
+                const relevantTemplate = templatesEvolucion.find(t => age >= t.ageMin && age <= t.ageMax);
+                if(relevantTemplate) {
+                     const li = document.createElement('li');
+                     li.textContent = `Para ${Math.floor(age)} años`;
+                     li.dataset.text = relevantTemplate.text;
+                     templateListEl.appendChild(li);
+                } else {
+                     templateListEl.innerHTML = `<li>No hay recomendaciones para esta edad.</li>`;
                 }
-            });
+            } else {
+                Object.keys(templates).forEach((category, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = category;
+                    li.dataset.category = category;
+                    templateCategoriesEl.appendChild(li);
+                    if (index === 0) {
+                        li.classList.add('active');
+                        displayTemplatesForCategory(category);
+                    }
+                });
+            }
             templateModal.classList.remove('hidden');
         }
 
@@ -1595,13 +2093,20 @@
                 const li = document.createElement('li');
                 li.textContent = template.title;
                 li.dataset.text = template.text;
+                li.dataset.physicalExamText = template.physicalExamText || '';
                 templateListEl.appendChild(li);
             });
         }
 
         function processTemplate(text) {
-            let age = document.getElementById('edad').value;
+            let age = edadInput.value;
             let gender = document.getElementById('genero').value;
+            
+            if(edadEnMesesCheckbox.checked) {
+                const months = parseInt(age) || 0;
+                const years = Math.floor(months / 12);
+                age = years; // Use years for template processing
+            }
 
             if (gender) {
                 let genderText = gender === 'Masculino' ? 'MASCULINO' : 'FEMENINA';
@@ -1645,11 +2150,11 @@
             const patient = state.patients.find(p => p.id === patientId);
             if (!patient) return;
             state.currentPatientId = patientId;
-            form.reset();
+            form.reset(); // Resets everything including switches and selects
             patientIdInput.value = patient.id;
             formTitle.textContent = patient.paciente.nombre || 'Editar Registro';
             
-            // Populate all simple fields
+            // Populate all simple fields and specific complex ones
             Object.keys(patient).forEach(sectionKey => {
                 if (typeof patient[sectionKey] === 'object' && patient[sectionKey] !== null && !Array.isArray(patient[sectionKey])) {
                     Object.keys(patient[sectionKey]).forEach(fieldKey => {
@@ -1667,20 +2172,49 @@
                      if(input) input.value = patient[sectionKey] ?? '';
                 }
             });
+
+            // Handle age input type
+            const ageInYears = parseFloat(patient.paciente.edad) || 0;
+            if (patient.paciente.edadEnMeses) {
+                edadEnMesesCheckbox.checked = true;
+                edadInput.value = patient.paciente.edadEnMeses;
+            } else {
+                edadEnMesesCheckbox.checked = false;
+                edadInput.value = patient.paciente.edad || '';
+            }
+            toggleAgeInputType(); // Update UI based on checkbox
             
-            // Populate dynamic/complex fields
-            renderDx(patient.diagnostico.lista || []);
+            // Populate dynamic/complex fields AFTER simple fields
+            renderDxChips(patient.diagnostico.lista || []);
             document.getElementById('dxDiferenciales').value = patient.diagnostico.diferenciales || '';
-            renderEscalas(patient.escalas);
+            (patient.tratamientoNoFarmacologico || []).forEach(val => {
+                const check = document.querySelector(`#tratamiento-no-farmacologico-card input[value="${val}"]`);
+                if(check) check.checked = true;
+            });
+            (patient.recomendacionesNino || []).forEach(val => {
+                const check = document.querySelector(`#recomendaciones-nino-card input[value="${val}"]`);
+                if(check) check.checked = true;
+            });
+            (patient.recomendacionesEmbarazada || []).forEach(val => {
+                const check = document.querySelector(`#recomendaciones-embarazada-card input[value="${val}"]`);
+                if(check) check.checked = true;
+            });
 
             // Trigger calculations and UI updates
             toggleCapilarFields();
+            toggleSistemasFields();
+            toggleExamenesNotas();
+            toggleViolenciaDetails();
+            updateLugarAtencion(); // Update options first
+            lugarAtencionSelect.value = patient.lugarAtencion || ''; // Then set value
             calculateIMC();
-            updatePahoInputs();
+            updatePahoInputs(); // Ensure PAHO inputs get correct values
             calculatePahoRisk();
             calculateFindrisc();
             updateActiveListItem();
             updateTimestamps(patient.createdAt, patient.updatedAt);
+            updateAllReferenceRanges(ageInYears); // Update ranges based on loaded age
+            toggleRecommendationCards(ageInYears, patient.paciente.genero, patient.diagnostico.lista); // Show/hide based on loaded data
         }
         
         function clearForm() {
@@ -1688,16 +2222,24 @@
             patientIdInput.value = '';
             state.currentPatientId = null;
             formTitle.textContent = 'Nuevo Registro';
-            renderEscalas([]);
-            renderDx([]);
-            addDx(); // Add one initial empty dx field
+            renderDxChips([{ code: 'Z713', description: 'PERSONA QUE CONSULTA PARA OBTENER CONSEJO E INFORMACION SOBRE LA DIETA' }]);
             updateActiveListItem();
             toggleCapilarFields();
+            toggleSistemasFields();
+            toggleExamenesNotas();
+            toggleViolenciaDetails();
             calculateIMC();
             updatePahoInputs();
             calculatePahoRisk();
             calculateFindrisc();
             updateTimestamps(null, null);
+            toggleAgeInputType(); // Set age to default (years)
+            updateAllReferenceRanges(0);
+            loadAndApplyLastAttentionSettings(); // Apply saved settings after reset
+            document.getElementById('temperatura').value = '36.5';
+            document.getElementById('spo2').value = '95';
+            toggleRecommendationCards(0, null, []);
+            autoCheckRecomendaciones(0, 0, null, []);
         }
 
         function updateTimestamps(created, updated) {
@@ -1734,13 +2276,32 @@
                 id: state.currentPatientId || `id_${Date.now()}`,
                 createdAt: existing?.createdAt || now, updatedAt: now,
                 paciente: {}, signosVitales: {}, antropometria: {}, medicionesCapilares: {},
-                diagnostico: { lista: [] }, examenes: { notas: '' }, escalas: [],
-                findrisc: {}, paho_risk: {}
+                diagnostico: { lista: [] }, examenes: { notas: '' }, 
+                findrisc: {}, paho_risk: {},
+                tratamientoNoFarmacologico: [],
+                recomendacionesNino: [],
+                recomendacionesEmbarazada: []
             };
+            
+            // Collect patient data including age type
+            record.paciente.nombre = formData.get('nombre');
+            record.paciente.cedula = formData.get('cedula');
+            record.paciente.genero = formData.get('genero');
+            if (edadEnMesesCheckbox.checked) {
+                record.paciente.edadEnMeses = formData.get('edad');
+                record.paciente.edad = (parseFloat(formData.get('edad')) / 12).toFixed(2);
+            } else {
+                record.paciente.edad = formData.get('edad');
+                record.paciente.edadEnMeses = null;
+            }
+
             for (let [key, value] of formData.entries()) {
                 if (key.startsWith('findrisc_')) record.findrisc[key.replace('findrisc_', '')] = value;
                 else if (key.startsWith('paho_')) record.paho_risk[key.replace('paho_', '')] = value;
-                else if (key === 'nombre' || key === 'cedula' || key === 'edad' || key === 'genero') record.paciente[key] = value;
+                else if (key.startsWith('tnf_')) record.tratamientoNoFarmacologico.push(value);
+                else if (key.startsWith('rec_nino_')) record.recomendacionesNino.push(value);
+                else if (key.startsWith('rec_emb_')) record.recomendacionesEmbarazada.push(value);
+                else if (['nombre', 'cedula', 'edad', 'genero'].includes(key)) { /* Already handled */ }
                 else if (['pas', 'pad', 'pam', 'fc', 'fr', 'spo2', 'temperatura'].includes(key)) record.signosVitales[key] = value ? parseFloat(value) : null;
                 else if (['peso', 'talla_cm', 'imc', 'perimetroAbdominal'].includes(key)) record.antropometria[key] = value ? parseFloat(value) : null;
                 else if (['glucosa', 'hemoglobina', 'hemoglobinaCorregida'].includes(key)) record.medicionesCapilares[key] = value ? parseFloat(value) : null;
@@ -1750,20 +2311,14 @@
                 else if(form.querySelector(`[name="${key}"]`)) record[key] = value;
             }
             if (!record.medicionesCapilares.noSeRealiza) record.medicionesCapilares.noSeRealiza = false;
+            record.examenes.noSeRealiza = formData.get('noSeRealizaExamenes') === 'on';
+            record.revisionSistemasNoSeRealiza = formData.get('noSeRealizaSistemas') === 'on';
             
             // Collect diagnoses
-            document.querySelectorAll('.dx-item').forEach(item => {
-                const desc = item.querySelector('.dx-description').value;
-                const code = item.querySelector('.dx-cie10').value;
-                if (desc || code) record.diagnostico.lista.push({ descripcion: desc, cie10: code });
-            });
-
-            // Collect custom scales
-            document.querySelectorAll('.escala-item').forEach(item => {
-                record.escalas.push({
-                    nombre: item.querySelector('.escala-nombre').value,
-                    resultado: item.querySelector('.escala-resultado').value,
-                    unidad: item.querySelector('.escala-unidad').value
+            document.querySelectorAll('.dx-chip').forEach(chip => {
+                record.diagnostico.lista.push({ 
+                    descripcion: chip.dataset.description, 
+                    cie10: chip.dataset.cie10 
                 });
             });
 
@@ -1782,9 +2337,8 @@
                 if (!state.currentPatientId) { 
                     state.currentPatientId = record.id; 
                     patientIdInput.value = record.id; 
-                    // After first save, repopulate to get IDs in dynamic fields
                     await loadAndRenderPatients(searchInput.value);
-                    populateForm(record.id);
+                    populateForm(record.id); // Repopulate to ensure all fields (like age) are correctly displayed
                 } else {
                     await loadAndRenderPatients(searchInput.value);
                     updateActiveListItem();
@@ -1864,49 +2418,26 @@
         }
 
         function calculatePahoRisk(updateDOM = true) {
-            const R = [
-                [ // Male, Non-smoker, No diabetes
-                    [0.03, 0.04, 0.05, 0.06], [0.04, 0.05, 0.06, 0.08], [0.05, 0.07, 0.08, 0.10], [0.07, 0.09, 0.11, 0.14]
-                ],
-                [ // Male, Smoker, No diabetes
-                    [0.06, 0.07, 0.09, 0.11], [0.08, 0.10, 0.12, 0.15], [0.11, 0.14, 0.17, 0.20], [0.16, 0.20, 0.24, 0.28]
-                ],
-                [ // Male, Non-smoker, Diabetes
-                    [0.10, 0.12, 0.15, 0.18], [0.14, 0.17, 0.20, 0.24], [0.19, 0.23, 0.27, 0.32], [0.26, 0.31, 0.37, 0.43]
-                ],
-                [ // Male, Smoker, Diabetes
-                    [0.17, 0.20, 0.24, 0.28], [0.22, 0.26, 0.31, 0.37], [0.29, 0.35, 0.41, 0.48], [0.39, 0.46, 0.53, 0.60]
-                ],
-                [ // Female, Non-smoker, No diabetes
-                    [0.02, 0.03, 0.03, 0.04], [0.03, 0.04, 0.05, 0.06], [0.05, 0.06, 0.07, 0.09], [0.07, 0.09, 0.11, 0.13]
-                ],
-                [ // Female, Smoker, No diabetes
-                    [0.04, 0.05, 0.06, 0.07], [0.06, 0.07, 0.09, 0.11], [0.09, 0.11, 0.13, 0.16], [0.13, 0.16, 0.19, 0.23]
-                ],
-                [ // Female, Non-smoker, Diabetes
-                    [0.07, 0.09, 0.11, 0.13], [0.10, 0.12, 0.15, 0.18], [0.14, 0.17, 0.20, 0.24], [0.20, 0.24, 0.29, 0.34]
-                ],
-                [ // Female, Smoker, Diabetes
-                    [0.12, 0.14, 0.17, 0.21], [0.16, 0.20, 0.23, 0.28], [0.23, 0.27, 0.32, 0.38], [0.31, 0.37, 0.44, 0.51]
-                ]
-            ];
             const age = parseInt(document.querySelector('[name="paho_edad"]').value);
             const sbp = parseInt(document.querySelector('[name="paho_pas"]').value);
             const gender = document.querySelector('[name="paho_genero"]').value;
             const smoker = parseInt(document.querySelector('[name="paho_fumador"]').value);
             const diabetes = parseInt(document.querySelector('[name="paho_diabetes"]').value);
+            const useChol = document.getElementById('paho_use_cholesterol').checked;
+            const cholesterol = parseInt(document.querySelector('[name="paho_colesterol"]').value);
 
-            let age_idx = -1;
-            if (age >= 40 && age <= 49) age_idx = 0; else if (age >= 50 && age <= 59) age_idx = 1; else if (age >= 60 && age <= 69) age_idx = 2; else if (age >= 70) age_idx = 3;
+            let risk = -1;
             
-            let sbp_idx = -1;
-            if (sbp < 140) sbp_idx = 0; else if (sbp <= 159) sbp_idx = 1; else if (sbp <= 179) sbp_idx = 2; else if (sbp >= 180) sbp_idx = 3;
+            if (useChol && !isNaN(cholesterol) && cholesterol > 0) {
+                // Placeholder: a real app would have different matrices here
+                risk = calculatePahoRiskNoChol(age, sbp, gender, smoker, diabetes) * (cholesterol > 200 ? 1.2 : 0.9);
+            } else {
+                risk = calculatePahoRiskNoChol(age, sbp, gender, smoker, diabetes);
+            }
 
-            let risk_group_idx = (gender === 'Femenino' ? 4 : 0) + (smoker * 1) + (diabetes * 2);
-
-            let risk = -1, text = "N/A", riskClass = "bajo";
-            if (age_idx > -1 && sbp_idx > -1) {
-                risk = R[risk_group_idx][age_idx][sbp_idx] * 100;
+            let text = "N/A", riskClass = "bajo";
+            if (risk !== -1 && !isNaN(risk)) {
+                risk = Math.round(risk * 100);
                 if (risk < 10) { text = `<10% (Bajo)`; riskClass = 'bajo'; } 
                 else if (risk < 20) { text = `10% a <20% (Medio)`; riskClass = 'medio'; } 
                 else if (risk < 30) { text = `20% a <30% (Alto)`; riskClass = 'alto'; } 
@@ -1921,45 +2452,21 @@
             }
             return { risk, text, riskClass };
         }
+
+        function calculatePahoRiskNoChol(age, sbp, gender, smoker, diabetes) {
+            const R = [ [[0.03,0.04,0.05,0.06],[0.04,0.05,0.06,0.08],[0.05,0.07,0.08,0.10],[0.07,0.09,0.11,0.14]], [[0.06,0.07,0.09,0.11],[0.08,0.10,0.12,0.15],[0.11,0.14,0.17,0.20],[0.16,0.20,0.24,0.28]], [[0.10,0.12,0.15,0.18],[0.14,0.17,0.20,0.24],[0.19,0.23,0.27,0.32],[0.26,0.31,0.37,0.43]], [[0.17,0.20,0.24,0.28],[0.22,0.26,0.31,0.37],[0.29,0.35,0.41,0.48],[0.39,0.46,0.53,0.60]], [[0.02,0.03,0.03,0.04],[0.03,0.04,0.05,0.06],[0.05,0.06,0.07,0.09],[0.07,0.09,0.11,0.13]], [[0.04,0.05,0.06,0.07],[0.06,0.07,0.09,0.11],[0.09,0.11,0.13,0.16],[0.13,0.16,0.19,0.23]], [[0.07,0.09,0.11,0.13],[0.10,0.12,0.15,0.18],[0.14,0.17,0.20,0.24],[0.20,0.24,0.29,0.34]], [[0.12,0.14,0.17,0.21],[0.16,0.20,0.23,0.28],[0.23,0.27,0.32,0.38],[0.31,0.37,0.44,0.51]] ];
+            let age_idx = -1; if (age >= 40 && age <= 49) age_idx = 0; else if (age >= 50 && age <= 59) age_idx = 1; else if (age >= 60 && age <= 69) age_idx = 2; else if (age >= 70) age_idx = 3;
+            let sbp_idx = -1; if (sbp < 140) sbp_idx = 0; else if (sbp <= 159) sbp_idx = 1; else if (sbp <= 179) sbp_idx = 2; else if (sbp >= 180) sbp_idx = 3;
+            let risk_group_idx = (gender === 'Femenino' ? 4 : 0) + (smoker * 1) + (diabetes * 2);
+            if (age_idx > -1 && sbp_idx > -1 && !isNaN(risk_group_idx)) { return R[risk_group_idx][age_idx][sbp_idx]; }
+            return -1;
+        }
         
         // --- Dynamic UI Functions ---
-
-        function addDx() {
-            const item = document.createElement('div');
-            item.className = 'dx-item';
-            item.innerHTML = `
-                <div class="form-group">
-                    <label>Descripción del Diagnóstico</label>
-                    <input type="text" class="dx-description" placeholder="Buscar por nombre o código CIE-10...">
-                </div>
-                <div class="form-group">
-                    <label>CIE-10</label>
-                    <input type="text" class="dx-cie10" readonly>
-                </div>
-                <button type="button" class="remove-dx-btn icon-button">&times;</button>
-            `;
-            dxContainer.appendChild(item);
-        }
-
-        function renderDx(dxList = []) {
-            dxContainer.innerHTML = '';
-            if (dxList.length === 0) { addDx(); return; }
-            dxList.forEach(dx => {
-                const item = document.createElement('div');
-                item.className = 'dx-item';
-                item.innerHTML = `
-                    <div class="form-group">
-                        <label>Descripción del Diagnóstico</label>
-                        <input type="text" class="dx-description" value="${dx.descripcion || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>CIE-10</label>
-                        <input type="text" class="dx-cie10" value="${dx.cie10 || ''}" readonly>
-                    </div>
-                    <button type="button" class="remove-dx-btn icon-button">&times;</button>
-                `;
-                dxContainer.appendChild(item);
-            });
+        
+        function renderDxChips(dxList = []) {
+            dxChipsContainer.innerHTML = '';
+            dxList.forEach(addDxChip);
         }
         
         function toggleCapilarFields() {
@@ -1971,34 +2478,124 @@
                 if (checkbox.checked) input.value = '';
             });
         }
-        
-        function addEscala() {
-            const item = document.createElement('div'); item.className = 'escala-item';
-            item.innerHTML = `
-                <input type="text" class="escala-nombre" placeholder="Nombre (ej: RCV)">
-                <input type="text" class="escala-resultado" placeholder="Resultado">
-                <input type="text" class="escala-unidad" placeholder="Unidad (ej: %)">
-                <button type="button" class="remove-escala-btn icon-button">&times;</button>
-            `; document.getElementById('escalas-container').appendChild(item);
+
+        function toggleSistemasFields() {
+            const checkbox = document.getElementById('noSeRealizaSistemas');
+            const textarea = document.getElementById('revisionSistemas');
+            textarea.disabled = checkbox.checked;
+            textarea.style.opacity = checkbox.checked ? '0.5' : '1';
+            if (checkbox.checked) textarea.value = '';
         }
         
-        function renderEscalas(escalas = []) {
-            const container = document.getElementById('escalas-container'); container.innerHTML = ''; if (!escalas) return;
-            escalas.forEach(e => { const item = document.createElement('div'); item.className = 'escala-item';
-                item.innerHTML = `
-                    <input type="text" class="escala-nombre" value="${e.nombre||''}">
-                    <input type="text" class="escala-resultado" value="${e.resultado||''}">
-                    <input type="text" class="escala-unidad" value="${e.unidad||''}">
-                    <button type="button" class="remove-escala-btn icon-button">&times;</button>
-                `; container.appendChild(item);
-            });
+        function toggleExamenesNotas() {
+            const checkbox = document.getElementById('noSeRealizaExamenes');
+            const textarea = document.getElementById('examenesNotas');
+            textarea.disabled = checkbox.checked;
+            textarea.style.opacity = checkbox.checked ? '0.5' : '1';
+            if (checkbox.checked) textarea.value = '';
+        }
+        
+        function toggleViolenciaDetails() {
+            tamizajeDetallesGroup.classList.toggle('hidden', tamizajeViolenciaSelect.value !== 'Positivo');
         }
 
         function updatePahoInputs() {
             document.querySelector('[name="paho_genero"]').value = document.getElementById('genero').value || 'Masculino';
-            document.querySelector('[name="paho_edad"]').value = document.getElementById('edad').value;
+            document.querySelector('[name="paho_edad"]').value = getAgeInYears();
             document.querySelector('[name="paho_pas"]').value = document.getElementById('pas').value;
         }
+
+        function getVitalSignRanges(age) {
+            if (age < 1) return { fc: '100-160', fr: '30-50', pas: '70-100', pad: '50-65' }; // Infant
+            if (age <= 2) return { fc: '80-130', fr: '24-40', pas: '80-112', pad: '50-80' }; // Toddler
+            if (age <= 5) return { fc: '80-120', fr: '22-34', pas: '80-110', pad: '50-78' }; // Preschool
+            if (age <= 12) return { fc: '70-110', fr: '18-30', pas: '84-120', pad: '54-80' }; // School-age
+            if (age < 18) return { fc: '60-90', fr: '12-20', pas: '94-139', pad: '62-88' }; // Adolescent
+            return { fc: '60-100', fr: '12-20', pas: '90-120', pad: '60-80' }; // Adult
+        }
+
+        function updateAllReferenceRanges(age) {
+            const ranges = getVitalSignRanges(age);
+            document.getElementById('fc-range').textContent = `Ref: ${ranges.fc}`;
+            document.getElementById('fr-range').textContent = `Ref: ${ranges.fr}`;
+
+            const pasGroup = document.getElementById('pas-group');
+            const padGroup = document.getElementById('pad-group');
+            const pamGroup = document.getElementById('pam-group');
+
+            if (age < 3) {
+                pasGroup.classList.add('hidden');
+                padGroup.classList.add('hidden');
+                pamGroup.classList.add('hidden');
+            } else {
+                pasGroup.classList.remove('hidden');
+                padGroup.classList.remove('hidden');
+                pamGroup.classList.remove('hidden');
+                document.getElementById('pas-range').textContent = `Ref: ${ranges.pas}`;
+                document.getElementById('pad-range').textContent = `Ref: ${ranges.pad}`;
+            }
+        }
+        
+        function getDefaultsByAge(age, gender) {
+            let vitals = { fc: '80', fr: '16', pas: '110', pad: '70' };
+            if (age < 1) { vitals = { fc: '120', fr: '40', pas: '85', pad: '55' }; }
+            else if (age <= 2) { vitals = { fc: '110', fr: '30', pas: '95', pad: '60' }; }
+            else if (age <= 5) { vitals = { fc: '95', fr: '22', pas: '95', pad: '60' }; }
+            else if (age <= 12) { vitals = { fc: '85', fr: '20', pas: '105', pad: '65' }; }
+            else if (age < 18) { vitals = { fc: '75', fr: '18', pas: '115', pad: '70' }; }
+
+            let anthro = (gender === 'Femenino') ? { peso: '60', talla: '163' } : { peso: '75', talla: '176' };
+            if (age <= 0) { anthro = { peso: '3.3', talla: '50' }; }
+            else if (age < 1) { anthro = { peso: '9.2', talla: '72' }; }
+            else if (age <= 3) { anthro = { peso: '14', talla: '95' }; }
+            else if (age <= 5) { anthro = { peso: '18', talla: '110' }; }
+            else if (age <= 10) { anthro = { peso: '32', talla: '138' }; }
+            else if (age < 18) { anthro = (gender === 'Femenino') ? { peso: '55', talla: '162' } : { peso: '65', talla: '175' }; }
+            
+            return { ...vitals, ...anthro };
+        }
+
+        function setVitalsAndAnthroDefaults(ageInYears, gender) {
+            const defaults = getDefaultsByAge(ageInYears, gender);
+            document.getElementById('fc').value = defaults.fc;
+            document.getElementById('fr').value = defaults.fr;
+            if (ageInYears >= 3) {
+                document.getElementById('pas').value = defaults.pas;
+                document.getElementById('pad').value = defaults.pad;
+            }
+            document.getElementById('peso').value = defaults.peso;
+            document.getElementById('talla').value = defaults.talla;
+            calculateIMC();
+            calculatePAM();
+        }
+        
+        const extramuralOptions = ["Triaje respiratorio", "Comunidad", "Centros Educativos", "Domicilio", "Albergues creados por desastres", "Albergues para refugiados", "Albergues", "Centros de Desarrollo Infantil - CDI", "Creciendo con nuestros hijos CNH", "Calle", "Centros de educación inicial", "Escuelas, interculturales familiares comunitarias", "Emergencia ambulatoria", "Centro de rehabilitación / carcelario", "Grupos laborales (fabricas y empresas)", "Centros de recuperación de adicciones", "Atención por medios telemáticos", "Centro de Atención Temporal", "Centro Gerontológico", "Seguimiento en domicilio COVID-19", "Seguimiento telefónico COVID-19", "Otros", "Brigada Externa"];
+
+        function updateLugarAtencion() {
+            const tipo = tipoAtencionSelect.value;
+            lugarAtencionSelect.innerHTML = ''; // Clear options
+            if (tipo === 'Intramural') {
+                lugarAtencionSelect.add(new Option('Establecimiento de Salud', 'Establecimiento de Salud'));
+                lugarAtencionSelect.disabled = true;
+            } else {
+                extramuralOptions.forEach(opt => lugarAtencionSelect.add(new Option(opt, opt)));
+                lugarAtencionSelect.disabled = false;
+            }
+            localStorage.setItem('lastTipoAtencion', tipo);
+        }
+        
+        function loadAndApplyLastAttentionSettings() {
+            const lastTipo = localStorage.getItem('lastTipoAtencion');
+            const lastLugar = localStorage.getItem('lastLugarAtencion');
+            if(lastTipo) {
+                tipoAtencionSelect.value = lastTipo;
+            }
+            updateLugarAtencion();
+            if(lastLugar && tipoAtencionSelect.value === 'Extramural') { // Only apply if Extramural is selected
+                lugarAtencionSelect.value = lastLugar;
+            }
+        }
+
 
         function applyInitialTheme() {
             const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -2010,7 +2607,107 @@
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
         }
+
+        function applyInitialMode() {
+            const savedMode = localStorage.getItem('appMode') || 'advanced'; // Default to advanced
+            if (savedMode === 'simplified') {
+                document.body.classList.add('simplified-mode');
+                modeToggle.checked = false; 
+            } else {
+                document.body.classList.remove('simplified-mode');
+                modeToggle.checked = true;
+            }
+        }
         
+        function getAgeInYears() {
+            const ageVal = parseFloat(edadInput.value) || 0;
+            return edadEnMesesCheckbox.checked ? ageVal / 12 : ageVal;
+        }
+
+        function toggleAgeInputType() {
+            const isMeses = edadEnMesesCheckbox.checked;
+            if (isMeses) {
+                edadLabel.textContent = "Edad (meses)";
+                edadInput.max = 36;
+                edadCalculadaSpan.classList.remove('hidden');
+            } else {
+                edadLabel.textContent = "Edad (años)";
+                edadInput.max = 120;
+                edadCalculadaSpan.classList.add('hidden');
+            }
+            handleAgeChange(); // Recalculate everything when type changes
+        }
+
+        function handleAgeChange() {
+            const ageVal = parseFloat(edadInput.value) || 0;
+            const isMeses = edadEnMesesCheckbox.checked;
+            const ageInYears = isMeses ? ageVal / 12 : ageVal;
+            const ageInMonths = isMeses ? ageVal : ageVal * 12;
+
+            if (isMeses) {
+                const years = Math.floor(ageVal / 12);
+                const months = ageVal % 12;
+                edadCalculadaSpan.textContent = `( ${years} año${years !== 1 ? 's' : ''} y ${months} mes${months !== 1 ? 'es' : ''} )`;
+            } else {
+                edadCalculadaSpan.textContent = '';
+            }
+
+            updateAllReferenceRanges(ageInYears);
+            
+            if (!state.currentPatientId && ageVal > 0) { // Only set defaults if new patient and age is entered
+                setVitalsAndAnthroDefaults(ageInYears, document.getElementById('genero').value);
+            }
+            
+            toggleRecommendationCards(ageInYears, document.getElementById('genero').value, []);
+            autoCheckRecomendaciones(ageInYears, ageInMonths, document.getElementById('genero').value, []);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function autoCheckRecomendaciones(ageInYears, ageInMonths, gender, dxList) {
+            // Uncheck all
+            document.querySelectorAll('#recomendaciones-nino-card input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('#recomendaciones-embarazada-card input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+            const isPregnant = dxList.some(dx => dx.cie10 && dx.cie10.startsWith('Z34')); // Z34.x Supervision of normal pregnancy
+            
+            if (isPregnant && gender === 'Femenino') {
+                document.getElementById('rec-emb-obligatoria').checked = true;
+                const otherRecs = Array.from(document.querySelectorAll('#recomendaciones-embarazada-card input:not(#rec-emb-obligatoria)'));
+                const randomRecs = shuffleArray(otherRecs).slice(0, 2);
+                randomRecs.forEach(cb => cb.checked = true);
+            } else if (ageInYears < 5) {
+                if (ageInMonths < 24) {
+                    document.querySelectorAll('#rec-nino-menor-24 input').forEach(cb => {
+                        if(recsNinoMenor24.includes(cb.value)) cb.checked = true;
+                    });
+                } else if (ageInMonths <= 59) {
+                    const options = Array.from(document.querySelectorAll('#rec-nino-24-59 input'));
+                    const randomOptions = shuffleArray(options).slice(0, 3);
+                    randomOptions.forEach(cb => cb.checked = true);
+                }
+            } else {
+                // Auto-check general recommendations for adults/older children
+                document.getElementById('tnf-alimentacion').checked = true;
+                document.getElementById('tnf-actividad').checked = true;
+                document.getElementById('tnf-higiene').checked = true;
+                document.getElementById('tnf-mental').checked = true;
+                document.getElementById('tnf-oral').checked = true;
+            }
+        }
+        
+        function toggleRecommendationCards(ageInYears, gender, dxList) {
+            const isPregnant = dxList.some(dx => dx.cie10 && dx.cie10.startsWith('Z34'));
+            document.getElementById('recomendaciones-nino-card').classList.toggle('hidden', ageInYears >= 5);
+            document.getElementById('recomendaciones-embarazada-card').classList.toggle('hidden', !(isPregnant && gender === 'Femenino'));
+        }
+
         // --- Event Listeners ---
         function setupEventListeners() {
             sidebarToggleBtn.addEventListener('click', () => {
@@ -2029,12 +2726,43 @@
             exportJsBtn.addEventListener('click', () => exporter.exportAsJS(collectFormData()));
             themeToggleBtn.addEventListener('click', toggleTheme);
             selectFolderBtn.addEventListener('click', selectDirectory);
-            templateBtn.addEventListener('click', openTemplateModal);
+            templateBtn.addEventListener('click', () => openTemplateModal('enfermedadActual'));
+            templateBtnPE.addEventListener('click', () => openTemplateModal('examenFisico'));
+            templateBtnEvolucion.addEventListener('click', () => openTemplateModal('evolucion'));
             closeModalBtn.addEventListener('click', closeTemplateModal);
             templateModal.addEventListener('click', (e) => { if (e.target === templateModal) closeTemplateModal(); });
             
+            tipoAtencionSelect.addEventListener('change', updateLugarAtencion);
+            lugarAtencionSelect.addEventListener('change', () => {
+                localStorage.setItem('lastLugarAtencion', lugarAtencionSelect.value);
+            });
+
             templateCategoriesEl.addEventListener('click', e => { if (e.target.tagName === 'LI') { document.querySelectorAll('#template-categories li').forEach(li => li.classList.remove('active')); e.target.classList.add('active'); displayTemplatesForCategory(e.target.dataset.category); } });
-            templateListEl.addEventListener('click', e => { if (e.target.tagName === 'LI') { document.getElementById('enfermedadActual').value = processTemplate(e.target.dataset.text); closeTemplateModal(); } });
+            
+            templateListEl.addEventListener('click', e => {
+                if (e.target.tagName === 'LI') {
+                    if (state.templateTargetId === 'evolucion') {
+                        document.getElementById('evolucion').value = e.target.dataset.text;
+                    } else {
+                        const textTargetId = 'enfermedadActual';
+                        const peTargetId = 'examenFisico';
+                        const templateText = e.target.dataset.text;
+                        const templatePE = e.target.dataset.physicalExamText;
+
+                        if (state.templateTargetId === peTargetId) {
+                             if (templatePE) { document.getElementById(peTargetId).value = processTemplate(templatePE); }
+                             else { showToast('Esta plantilla no tiene texto para Examen Físico.', 'info'); }
+                        } else { // Default to enfermedadActual
+                            if (templateText) { document.getElementById(textTargetId).value = processTemplate(templateText); }
+                            else { showToast('Esta plantilla no tiene texto para Enfermedad Actual.', 'info'); }
+                        }
+                    }
+                    closeTemplateModal();
+                }
+            });
+
+            edadEnMesesCheckbox.addEventListener('change', toggleAgeInputType);
+            edadInput.addEventListener('input', handleAgeChange);
 
             form.addEventListener('input', e => {
                 clearTimeout(state.autosaveTimeout);
@@ -2042,20 +2770,39 @@
                 if (['pas', 'pad'].includes(e.target.id)) calculatePAM();
                 if (['peso', 'talla'].includes(e.target.id)) calculateIMC();
                 if (['genero', 'edad', 'pas'].includes(e.target.id)) { updatePahoInputs(); calculatePahoRisk(); }
+                
                 if (e.target.id === 'noSeRealizaCapilar') toggleCapilarFields();
+                if (e.target.id === 'noSeRealizaSistemas') toggleSistemasFields();
+                if (e.target.id === 'noSeRealizaExamenes') toggleExamenesNotas();
+                if (e.target.id === 'tamizajeViolencia') toggleViolenciaDetails();
                 if(e.target.checkValidity()) e.target.classList.remove('invalid');
             });
             
-            document.getElementById('add-dx-btn').addEventListener('click', addDx);
-            dxContainer.addEventListener('click', e => { if (e.target.classList.contains('remove-dx-btn')) e.target.closest('.dx-item').remove(); });
-            dxContainer.addEventListener('input', e => { if (e.target.classList.contains('dx-description')) handleDxSearch(e.target); });
-            dxContainer.addEventListener('focusout', () => setTimeout(closeAutocomplete, 150));
-            
-            findriscForm.addEventListener('input', () => calculateFindrisc());
-            pahoRiskForm.addEventListener('input', () => calculatePahoRisk());
+            dxSearchInput.addEventListener('input', () => handleDxSearch(dxSearchInput));
+            dxSearchInput.addEventListener('focusout', () => setTimeout(closeAutocomplete, 150));
+            dxChipsContainer.addEventListener('click', (e) => {
+                if(e.target.tagName === 'BUTTON') {
+                    e.target.parentElement.remove();
+                    const ageInYears = getAgeInYears();
+                    const ageInMonths = edadEnMesesCheckbox.checked ? parseFloat(edadInput.value) : ageInYears * 12;
+                    const dxList = Array.from(dxChipsContainer.querySelectorAll('.dx-chip')).map(chip => ({ cie10: chip.dataset.cie10 }));
+                    toggleRecommendationCards(ageInYears, document.getElementById('genero').value, dxList);
+                }
+            });
 
-            document.getElementById('add-escala-btn').addEventListener('click', addEscala);
-            document.getElementById('escalas-container').addEventListener('click', e => { if (e.target.classList.contains('remove-escala-btn')) e.target.closest('.escala-item').remove(); });
+            findriscForm.addEventListener('input', () => calculateFindrisc());
+            pahoRiskForm.addEventListener('input', e => {
+                if (e.target.id === 'paho_use_cholesterol') {
+                    document.getElementById('paho-cholesterol-group').classList.toggle('hidden');
+                }
+                calculatePahoRisk();
+            });
+
+            modeToggle.addEventListener('change', (e) => {
+                const isAdvanced = e.target.checked;
+                document.body.classList.toggle('simplified-mode', !isAdvanced);
+                localStorage.setItem('appMode', isAdvanced ? 'advanced' : 'simplified');
+            });
         }
         init();
     });
